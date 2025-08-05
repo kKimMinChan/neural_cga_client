@@ -1,0 +1,37 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UserModule } from './user/user.module';
+import { UserSyncModule } from './sync/user-sync/user-sync.module';
+import { NetworkMonitorModule } from './network-monitor/network-monitor.module';
+import { TokenStoreModule } from './token-store/token-store.module';
+import { AuthModule } from './auth/auth.module';
+import { CentralApiModule } from './central-api/central-api.module';
+import { IntrinsicCaptureModule } from './intrinsic-capture/intrinsic-capture.module';
+import { ProjectModule } from './project/project.module';
+import { TopGuardModule } from './top-guard/top-guard.module';
+import { RasPiModule } from './ras-pi/ras-pi.module';
+import { CaptureRequestModule } from './capture-request/capture-request.module';
+import { IntrinsicRequestModule } from './intrinsic-request/intrinsic-request.module';
+import { IntrinsicResultModule } from './intrinsic-result/intrinsic-result.module';
+
+@Module({
+  imports: [
+    UserModule,
+    UserSyncModule,
+    NetworkMonitorModule,
+    TokenStoreModule,
+    AuthModule,
+    CentralApiModule,
+    IntrinsicCaptureModule,
+    ProjectModule,
+    TopGuardModule,
+    RasPiModule,
+    CaptureRequestModule,
+    IntrinsicRequestModule,
+    IntrinsicResultModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}

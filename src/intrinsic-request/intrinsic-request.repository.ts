@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import {
   CreateIntrinsicRequestInput,
-  IntrinsicRequestStatus,
+  CreateIntrinsicSelectionsInput,
 } from './intrinsic-request.schema';
 import { db } from 'src/db/db';
-import { intrinsicRequests } from 'src/db/schema';
-import { eq } from 'drizzle-orm';
+import { intrinsicRequests, intrinsicSelections } from 'src/db/schema';
+import { and, desc, eq } from 'drizzle-orm';
+import { RequestStatus } from 'src/common/type/request-status';
 
 @Injectable()
 export class IntrinsicRequestRepository {
   async createIntrinsicRequest(data: CreateIntrinsicRequestInput) {
+    console.log('createIntrinsicRequest', data);
     return await db
       .insert(intrinsicRequests)
       .values(data)
@@ -17,11 +19,7 @@ export class IntrinsicRequestRepository {
       .then((res) => res[0]);
   }
 
-  async updateStatus(
-    id: number,
-    status: IntrinsicRequestStatus,
-    errorMessage?: string,
-  ) {
+  async updateStatus(id: number, status: RequestStatus, errorMessage?: string) {
     return await db
       .update(intrinsicRequests)
       .set(errorMessage ? { status, errorMessage } : { status })
@@ -33,5 +31,41 @@ export class IntrinsicRequestRepository {
       .select()
       .from(intrinsicRequests)
       .where(eq(intrinsicRequests.id, id));
+  }
+
+  async createIntrinsicSelections(data: CreateIntrinsicSelectionsInput) {
+    return await db
+      .insert(intrinsicSelections)
+      .values(data)
+      .returning()
+      .then((res) => res[0]);
+  }
+
+  async findIntrinsicSelections(intrinsicRequestId: number) {
+    return await db
+      .select()
+      .from(intrinsicSelections)
+      .where(eq(intrinsicSelections.intrinsicRequestId, intrinsicRequestId));
+  }
+
+  async findTopGuardIdLatestRequest(topGuardId: number) {
+    return await db
+      .select()
+      .from(intrinsicRequests)
+      .where(eq(intrinsicRequests.topGuardId, topGuardId))
+      .orderBy(desc(intrinsicRequests.createdAt))
+      .limit(1);
+  }
+
+  async findTopGuardIdFailedRequests(topGuardId: number) {
+    return await db
+      .select()
+      .from(intrinsicRequests)
+      .where(
+        and(
+          eq(intrinsicRequests.topGuardId, topGuardId),
+          eq(intrinsicRequests.status, RequestStatus.Failed),
+        ),
+      );
   }
 }

@@ -3,20 +3,39 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { Client } from 'ssh2';
 import * as ping from 'ping';
+import { TopGuardService } from 'src/top-guard/top-guard.service';
 
 const execAsync = promisify(exec);
 
 @Injectable()
 export class RasPiService {
+  constructor(private readonly topGuardService: TopGuardService) {}
   async getRasPiInfoViaSSH(host: string, username: string, password: string) {
     return new Promise<{ ip?: string; mac?: string; webrtcUrl?: string }>(
       (resolve, reject) => {
         const conn = new Client();
         conn
           .on('ready', () => {
+            const cmd = `
+                set -e
+                IF=$(ip -o -4 route show to default 2>/dev/null | awk '{print $5; exit}')
+                if [ -z "$IF" ]; then
+                  for i in /sys/class/net/*; do n=$(basename "$i");
+                    case "$n" in lo|docker*|veth*|br*|virbr*|l4tbr*|vmnet*|tailscale*|zt*) continue;; esac
+                    [ "$(cat "$i/type" 2>/dev/null)" = "1" ] || continue
+                    [ "$(cat "$i/operstate" 2>/dev/null)" = "up" ] || continue
+                    IF="$n"; break
+                  done
+                fi
+                IP=$(ip -4 -o addr show dev "$IF" 2>/dev/null | awk '{print $4}' | cut -d/ -f1 | head -n1)
+                MAC=$(cat /sys/class/net/"$IF"/address 2>/dev/null || echo unknown)
+                HOST=$(hostname)
+                printf "%s\\n%s\\n%s\\n%s\\n" "$IP" "$MAC" "$HOST" "$IF"
+                `;
             // 1. ip, mac, hostname 추출
             conn.exec(
-              'hostname -I && (cat /sys/class/net/eth0/address 2>/dev/null || cat /sys/class/net/wlan0/address) && hostname',
+              cmd,
+              // 'hostname -I && (cat /sys/class/net/eth0/address 2>/dev/null || cat /sys/class/net/wlan0/address) && hostname',
               (err, stream) => {
                 if (err) {
                   conn.end();
@@ -26,11 +45,12 @@ export class RasPiService {
                 stream
                   .on('close', async () => {
                     const [ipLine, mac, hostname] = data.trim().split('\n');
-                    // console.log('data', data);
-                    const ip = ipLine
-                      .split(' ')
-                      .find((ip) => ip.startsWith('192.168.0')); // 원하는 대역
+                    const ip = host;
+                    // const ip = ipLine
+                    //   .split(' ')
+                    //   .find((ip) => ip.startsWith('192.168.0')); // 원하는 대역
                     // 2. mediamtx 프로세스 확인 및 webrtc 주소 추출 시도
+                    // console.log(ipLine);
                     let webrtcUrl: string | undefined = undefined;
                     try {
                       // mediamtx 프로세스가 실행 중인지 확인
@@ -71,7 +91,12 @@ export class RasPiService {
                               : '';
                           }
                         }
-                        const configPaths = [execDir + '/mediamtx.yml'];
+                        const configPaths = [
+                          execDir + '/mediamtx.yml',
+                          '/home/fboe/Desktop/ffmpeg/mediamtx.yml',
+                        ];
+
+                        console.log('configPaths', configPaths, ip);
 
                         let configContent = '';
                         for (const path of configPaths) {
@@ -82,11 +107,12 @@ export class RasPiService {
                                 s.on('close', () => res(d)).on(
                                   'data',
                                   (chunk) => {
-                                    d += chunk;
+                                    d += chunk.toString('utf8');
                                   },
                                 );
                               });
                             });
+                            // console.log('configContent', configContent);
                             if (
                               configContent &&
                               configContent.includes('paths:')
@@ -171,6 +197,7 @@ export class RasPiService {
       );
     }
     const results = await Promise.all(promises);
+    // console.log(results);
     return results.filter(Boolean) as string[]; // 살아있는 IP만 반환
   }
 
@@ -187,6 +214,7 @@ export class RasPiService {
   ): Promise<{ ip: string; mac: string; webRtcUrl?: string }[]> {
     // console.time('scanNetwork');
     const ipList = await this.scanNetwork();
+    // console.log(ipList);
     // console.timeEnd('scanNetwork');
     const results: { ip: string; mac: string; webRtcUrl?: string }[] = [];
     // console.time('allSSH');
@@ -195,6 +223,7 @@ export class RasPiService {
         // console.time(`ssh-${ip}`);
         try {
           const info = await this.getRasPiInfoViaSSH(ip, username, password);
+          console.log('info', info, ip);
           if (info.ip && info.mac) {
             results.push({
               ip: info.ip,
@@ -212,6 +241,18 @@ export class RasPiService {
     // console.timeEnd('allSSH');
     return results;
   }
+
+  async getTopGuardMac(mac: string, topGuardId: string) {
+    const topGuards = await this.getAllRasPiInfoViaSSH();
+    const topGuard = topGuards.find((topGuard) => topGuard.mac === mac);
+    if (topGuard && topGuard?.webRtcUrl) {
+      return await this.topGuardService.update({
+        id: +topGuardId,
+        webRtcUrl: topGuard.webRtcUrl,
+      });
+    }
+    return null;
+  }
 }
 
 // streamname 추출 (paths: 아래 첫 번째 키, 라인 파싱 방식)
@@ -224,13 +265,14 @@ function extractStreamName(
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trimEnd();
     // console.log('line', JSON.stringify(line), 'ip', ip);
-
     if (!inPaths) {
       if (line.trim() === 'paths:') {
         inPaths = true;
       }
       continue;
     }
+
+    console.log('line', line, ip);
 
     // paths: 이후
     if (line.trim() === '' || line.trim().startsWith('#')) {

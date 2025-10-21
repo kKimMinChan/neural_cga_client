@@ -31,7 +31,6 @@ export class SwaggerHelper {
           },
         }
       : {};
-
     return {
       description,
       schema: {

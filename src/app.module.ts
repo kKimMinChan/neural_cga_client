@@ -11,10 +11,13 @@ import { IntrinsicCaptureModule } from './intrinsic-capture/intrinsic-capture.mo
 import { ProjectModule } from './project/project.module';
 import { TopGuardModule } from './top-guard/top-guard.module';
 import { RasPiModule } from './ras-pi/ras-pi.module';
-import { CaptureRequestModule } from './capture-request/capture-request.module';
+import { CaptureRequestModule } from './intrinsic-capture-request/capture-request.module';
 import { IntrinsicRequestModule } from './intrinsic-request/intrinsic-request.module';
-import { IntrinsicResultModule } from './intrinsic-result/intrinsic-result.module';
-
+import { IntrinsicOutputModule } from './intrinsic-output/intrinsic-output.module';
+import { ExtrinsicCapturePairModule } from './extrinsic-capture-pair/extrinsic-capture-pair.module';
+import { ExtrinsicCaptureRequestModule } from './extrinsic-capture-request/extrinsic-capture-request.module';
+import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 @Module({
   imports: [
     UserModule,
@@ -29,9 +32,15 @@ import { IntrinsicResultModule } from './intrinsic-result/intrinsic-result.modul
     RasPiModule,
     CaptureRequestModule,
     IntrinsicRequestModule,
-    IntrinsicResultModule,
+    IntrinsicOutputModule,
+    ExtrinsicCapturePairModule,
+    ExtrinsicCaptureRequestModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_PIPE, useClass: ZodValidationPipe },
+    { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
+  ],
 })
 export class AppModule {}

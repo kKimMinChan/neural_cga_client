@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { RasPiService } from './ras-pi.service';
 import { RasPiResponse } from './ras-pi.response';
 import { SwaggerHelper } from 'src/common/SwaggerHelper';
@@ -18,9 +18,25 @@ export class RasPiController {
       true,
     ),
   )
-  async getAllRasPiInfoViaSSH() {
-    const rasPiInfo = await this.rasPiService.getAllRasPiInfoViaSSH();
+  async getAllRasPiInfoViaSSH(
+    @Query('password') password: string,
+    @Query('username') username: string,
+  ) {
+    const rasPiInfo = await this.rasPiService.getAllRasPiInfoViaSSH(
+      username,
+      password,
+    );
     return { data: rasPiInfo };
+  }
+
+  @Get('top-guard-mac')
+  async getTopGuardMac(
+    @Query('mac') mac: string,
+    @Query('topGuardId') topGuardId: string,
+  ) {
+    const topGuard = await this.rasPiService.getTopGuardMac(mac, topGuardId);
+    console.log('topGuard', topGuard, mac);
+    return { data: topGuard };
   }
 
   @Get('scan-network')

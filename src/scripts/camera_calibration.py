@@ -6,39 +6,62 @@ from pathlib import Path
 import json
 import argparse
 
-# 체커보드 내부 코너 개수 (가로 방향 11, 세로 방향 8)
-CHECKERBOARD = (11, 8)
+# 체커보드 내부 코너 기본값 (가로, 세로)
+DEFAULT_CHECKERBOARD = (27, 19)
 SQUARE_SIZE_X = 34  # mm
 SQUARE_SIZE_Y = 33  # mm
+
+# 월드 좌표계의 3D 포인트 준비 (Z=0)
+# objp = np.zeros((CHECKERBOARD[0]*CHECKERBOARD[1], 3), np.float32)
+# objp[:, 0] = np.tile(np.arange(CHECKERBOARD[0]), CHECKERBOARD[1]) * SQUARE_SIZE_X
+# objp[:, 1] = np.repeat(np.arange(CHECKERBOARD[1]), CHECKERBOARD[0]) * SQUARE_SIZE_Y
+
+objpoints = []  # 3D 점
+imgpoints = []  # 2D 점
+images = []
+paths = []
+result_images = []
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--image-paths', nargs='+', required=True)
+parser.add_argument('--save-path', required=True)
+parser.add_argument('--board-cols', type=int, help='체커보드 가로 칸 수 (정사각형 기준)')
+parser.add_argument('--board-rows', type=int, help='체커보드 세로 칸 수 (정사각형 기준)')
+parser.add_argument('--input-type', choices=['squares', 'corners'], default='squares',
+                    help='전달 값의 기준: squares(정사각형 수) | corners(내부 코너 수)')
+args = parser.parse_args()
+
+p_cols = args.board_cols
+p_rows = args.board_rows
+
+# 인자로 패턴이 들어오면 내부 코너 수로 변환
+if p_cols is not None and p_rows is not None:
+    if args.input_type == 'squares':
+        CHECKERBOARD = (max(p_cols - 1, 2), max(p_rows - 1, 2))
+    else:
+        CHECKERBOARD = (p_cols, p_rows)
+else:
+    CHECKERBOARD = DEFAULT_CHECKERBOARD
 
 # 월드 좌표계의 3D 포인트 준비 (Z=0)
 objp = np.zeros((CHECKERBOARD[0]*CHECKERBOARD[1], 3), np.float32)
 objp[:, 0] = np.tile(np.arange(CHECKERBOARD[0]), CHECKERBOARD[1]) * SQUARE_SIZE_X
 objp[:, 1] = np.repeat(np.arange(CHECKERBOARD[1]), CHECKERBOARD[0]) * SQUARE_SIZE_Y
 
-objpoints = []  # 3D 점
-imgpoints = []  # 2D 점
-images = []
-paths = []
+pairs = list(zip(args.image_paths[::2], args.image_paths[1::2]))
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--image-paths', nargs='+', required=True)
-parser.add_argument('--save-path', required=True)
-args = parser.parse_args()
-
-image_paths = args.image_paths
 save_path = args.save_path
 
 os.makedirs(save_path, exist_ok=True)
 
 result_dir = save_path
 
-if not image_paths:
+if not pairs:
     print("❌ 이미지 경로를 인자로 전달해야 합니다.")
     sys.exit(1)
 
-for path_str in image_paths:
-    path = Path(path_str)
+for pair in pairs:
+    path = Path(pair[0])
     img = cv2.imread(str(path))
 
     if img is None:
@@ -58,6 +81,10 @@ for path_str in image_paths:
 
         img_with_corners = cv2.drawChessboardCorners(img.copy(), CHECKERBOARD, corners2, ret)
         save_file_path = os.path.join(result_dir, f'detected_{path.name}')
+        result_images.append({
+            "id": pair[1],
+            "path": save_file_path
+        })
         cv2.imwrite(save_file_path, img_with_corners)
 
         print(f"✅ 체커보드 감지 성공: {path.name}")
@@ -65,6 +92,10 @@ for path_str in image_paths:
         print(f"❌ 체커보드 감지 실패: {path.name}")
 
 if len(objpoints) < 3:
+    CalibrationResult = {
+        "resultImageInfos": result_images
+    }
+    print(json.dumps(CalibrationResult, ensure_ascii=False, indent=2))
     print("❗ 최소 3장 이상의 유효한 체커보드 이미지가 필요합니다.")
     sys.exit(1)
 
@@ -105,6 +136,7 @@ CalibrationResult = {
     "distCoeffs": dist.tolist(),
     "usedImageCount": len(objpoints),
     "meanReprojectionError": mean_error,
-    "perImageReprojectionError": dict(zip(paths, [float(f"{e:.4f}") for e in per_image_errors]))
+    "perImageReprojectionError": dict(zip(paths, [float(f"{e:.4f}") for e in per_image_errors])),
+    "resultImageInfos": result_images
 }
 print(json.dumps(CalibrationResult, ensure_ascii=False, indent=2))

@@ -6,5 +6,6 @@ import { TopGuardRepository } from './top-guard.repository';
 @Module({
   controllers: [TopGuardController],
   providers: [TopGuardService, TopGuardRepository],
+  exports: [TopGuardService],
 })
 export class TopGuardModule {}

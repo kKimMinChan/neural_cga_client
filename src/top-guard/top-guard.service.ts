@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { TopGuardRepository } from './top-guard.repository';
-import { CreateTopGuardInput, UpdateTopGuardInput } from './top-guard.schema';
+import {
+  CreateTopGuardInput,
+  UpdateIntrinsicStageInput,
+  UpdateTopGuardDto,
+} from './top-guard.schema';
 import { ErrorHelper } from 'src/common/ErrorHelper';
 
 @Injectable()
@@ -31,9 +35,19 @@ export class TopGuardService {
     return topGuard;
   }
 
-  async update(id: number, body: UpdateTopGuardInput) {
+  async update(body: UpdateTopGuardDto) {
     try {
-      const topGuard = await this.topGuardRepository.updateTopGuard(id, body);
+      console.log('body', body);
+      const topGuard = await this.topGuardRepository.updateTopGuard(body);
+      return topGuard;
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
+
+  async updateIntrinsicStage(body: UpdateIntrinsicStageInput) {
+    try {
+      const topGuard = await this.topGuardRepository.updateIntrinsicStage(body);
       return topGuard;
     } catch (error) {
       ErrorHelper.handle(error);

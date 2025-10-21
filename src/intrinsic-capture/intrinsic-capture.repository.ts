@@ -1,11 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { db } from 'src/db/db';
 import { captureRequests, intrinsicCaptures } from 'src/db/schema';
-import {
-  CreateIntrinsicCaptureInput,
-  SelectionCaptureInput,
-} from './intrinsic-capture.schema';
-import { eq, inArray } from 'drizzle-orm';
+import { CreateIntrinsicCaptureInput } from './intrinsic-capture.schema';
+import { eq, inArray, desc } from 'drizzle-orm';
 
 @Injectable()
 export class IntrinsicCaptureRepository {
@@ -17,15 +14,12 @@ export class IntrinsicCaptureRepository {
       .then((res) => res[0]);
   }
 
-  async selections(data: SelectionCaptureInput) {
-    return await db.transaction(async (tx) => {
-      for (const selection of data.selections) {
-        await tx
-          .update(intrinsicCaptures)
-          .set({ isSelected: selection.isSelected })
-          .where(eq(intrinsicCaptures.id, selection.intrinsicCaptureId));
-      }
-    });
+  async findOne(id: number) {
+    return await db
+      .select()
+      .from(intrinsicCaptures)
+      .where(eq(intrinsicCaptures.id, id))
+      .then((res) => res[0]);
   }
 
   async findIntrinsicCaptureByTopGuardId(topGuardId: number) {
@@ -45,7 +39,8 @@ export class IntrinsicCaptureRepository {
     const results = await db
       .select()
       .from(intrinsicCaptures)
-      .where(inArray(intrinsicCaptures.captureRequestId, captureRequestIds));
+      .where(inArray(intrinsicCaptures.captureRequestId, captureRequestIds))
+      .orderBy(desc(intrinsicCaptures.createdAt));
 
     return results;
   }

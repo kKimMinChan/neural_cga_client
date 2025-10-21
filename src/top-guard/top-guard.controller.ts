@@ -6,12 +6,13 @@ import {
   Param,
   Delete,
   Put,
+  Patch,
 } from '@nestjs/common';
 import { TopGuardService } from './top-guard.service';
 import {
   CreateTopGuardInput,
   CreateTopGuardSchema,
-  UpdateTopGuardInput,
+  UpdateTopGuardDto,
   UpdateTopGuardSchema,
 } from './top-guard.schema';
 import { ZodValidationPipe } from 'src/common/zod-validation.pipe';
@@ -78,13 +79,12 @@ export class TopGuardController {
     };
   }
 
-  @Put(':id')
+  @Patch()
   async update(
-    @Param('id') id: number,
     @Body(new ZodValidationPipe(UpdateTopGuardSchema))
-    body: UpdateTopGuardInput,
+    body: UpdateTopGuardDto,
   ) {
-    const topGuard = await this.topGuardService.update(+id, body);
+    const topGuard = await this.topGuardService.update(body);
     return {
       data: topGuard,
     };

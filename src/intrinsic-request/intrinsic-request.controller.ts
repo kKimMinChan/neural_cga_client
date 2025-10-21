@@ -34,39 +34,42 @@ export class IntrinsicRequestController {
     ),
   )
   async create(@Body() body: IntrinsicSelections) {
-    const result = await this.intrinsicRequestService.saveSelectionsAndRequest({
-      topGuardId: body.topGuardId,
-      selections: body.selections,
-    });
+    const intrinsicRequest =
+      await this.intrinsicRequestService.createIntrinsicRequest(body);
 
-    void this.intrinsicRequestService.sendToAI(
-      result.absPaths,
+    const result = await this.intrinsicRequestService.createSelectionImages(
+      intrinsicRequest.id,
+      body.intrinsicCaptureIds,
       +body.topGuardId,
-      result.intrinsicRequest.id,
     );
 
-    return { data: result.intrinsicRequest };
+    void this.intrinsicRequestService.sendToAI(
+      result,
+      +body.topGuardId,
+      intrinsicRequest.id,
+      body.boardCols,
+      body.boardRows,
+      body.inputType,
+    );
+
+    return { data: intrinsicRequest };
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.intrinsicRequestService.findAll();
-  // }
-
-  @Get(':intrinsicRequestId')
-  async findOne(@Param('intrinsicRequestId') intrinsicRequestId: string) {
+  @Get('latest/:topGuardId') // 탑가드 아이디로 최신 요청 조회
+  async findTopGuardIdLatestRequest(@Param('topGuardId') topGuardId: string) {
     const result =
-      await this.intrinsicRequestService.findOne(+intrinsicRequestId);
+      await this.intrinsicRequestService.findTopGuardIdLatestRequest(
+        +topGuardId,
+      );
     return { data: result };
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateIntrinsicRequestDto: any) {
-  //   return this.intrinsicRequestService.update(+id, updateIntrinsicRequestDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.intrinsicRequestService.remove(+id);
-  // }
+  @Get('failed-all/:topGuardId') // 탑가드 아이디에 해당하는 실패한 요청 모두 조회
+  async findTopGuardIdFailedRequests(@Param('topGuardId') topGuardId: string) {
+    const result =
+      await this.intrinsicRequestService.findTopGuardIdFailedRequests(
+        +topGuardId,
+      );
+    return { data: result };
+  }
 }

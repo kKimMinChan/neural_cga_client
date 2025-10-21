@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import {
   CalibrationResult,
   IntrinsicSelections,
@@ -10,65 +15,104 @@ import { ErrorHelper } from 'src/common/ErrorHelper';
 import { IntrinsicCaptureService } from 'src/intrinsic-capture/intrinsic-capture.service';
 import * as path from 'path';
 import { IntrinsicRequestRepository } from './intrinsic-request.repository';
-import { IntrinsicResultService } from 'src/intrinsic-result/intrinsic-result.service';
-import { IntrinsicRequestStatus } from './intrinsic-request.schema';
+import { IntrinsicOutputService } from 'src/intrinsic-output/intrinsic-output.service';
+import { RequestStatus } from 'src/common/type/request-status';
+import { StageEnum } from 'src/top-guard/top-guard.schema';
+import { TopGuardService } from 'src/top-guard/top-guard.service';
+import { saveCalibrationYaml } from 'src/common/saveCalibrationYaml';
 
 @Injectable()
 export class IntrinsicRequestService {
   constructor(
     private readonly intrinsicCaptureService: IntrinsicCaptureService,
     private readonly intrinsicRequestRepository: IntrinsicRequestRepository,
-    private readonly intrinsicResultService: IntrinsicResultService,
+    @Inject(forwardRef(() => IntrinsicOutputService))
+    private readonly intrinsicResultService: IntrinsicOutputService,
+    private readonly topGuardService: TopGuardService,
   ) {}
-  async saveSelectionsAndRequest(body: IntrinsicSelections) {
+
+  async createIntrinsicRequest(body: IntrinsicSelections) {
     try {
-      await this.intrinsicCaptureService.selections({
-        selections: body.selections,
-      });
-
-      const selections = await this.intrinsicCaptureService.getSelections(
-        +body.topGuardId,
-      );
-      const imagePaths = selections
-        .filter((v): v is { id: number; imagePath: string } => v !== null)
-        .map((v) => v.imagePath);
-      const desktopPath = `${process.env.IMAGE_SAVE_PATH}/${body.topGuardId}/capture_images`;
-      const absPaths = imagePaths.map((p) =>
-        path.isAbsolute(p) ? p : path.resolve(desktopPath, p),
-      );
-
-      if (selections.length < 3) {
-        throw new BadRequestException('최소 3장 이상의 이미지가 필요합니다.');
-      }
-
       const intrinsicRequest =
         await this.intrinsicRequestRepository.createIntrinsicRequest({
           topGuardId: body.topGuardId,
-          selections: selections.map((v) => v.id),
         });
-
-      return {
-        intrinsicRequest,
-        absPaths,
-      };
+      return intrinsicRequest;
     } catch (error) {
       ErrorHelper.handle(error);
     }
   }
 
-  async sendToAI(
-    imagePaths: string[],
-    topGuardId: number,
+  async createSelectionImages(
     intrinsicRequestId: number,
+    intrinsicCaptureIds: number[],
+    topGuardId: number,
   ) {
     try {
-      const imageArg = imagePaths?.join(' ') || '';
+      const selections = await Promise.all(
+        intrinsicCaptureIds.map(async (v) => {
+          const selection =
+            await this.intrinsicRequestRepository.createIntrinsicSelections({
+              intrinsicCaptureId: v,
+              intrinsicRequestId,
+            });
+          // intrinsicCapture에서 imagePath 조회
+          const capture = await this.intrinsicCaptureService.findOne(v);
+          return {
+            id: selection.id,
+            imagePath: capture.fileName,
+          };
+        }),
+      );
 
-      const command = `python3 src/scripts/camera_calibration.py --image-paths ${imageArg} --save-path ${process.env.IMAGE_SAVE_PATH}/${topGuardId}/result_images/${intrinsicRequestId}`;
+      // const selections = await this.intrinsicCaptureService.getSelections(
+      //   +body.topGuardId,
+      // );
+      const imagePaths = selections
+        .filter((v): v is { id: number; imagePath: string } => v !== null)
+        .map((v) => v);
+      const desktopPath = `${process.env.IMAGE_SAVE_PATH}/${topGuardId}/capture_images`;
+      const absPaths = imagePaths.map((p) => ({
+        id: p.id,
+        path: path.resolve(desktopPath, p.imagePath),
+      }));
+
+      if (selections.length < 3) {
+        throw new BadRequestException('최소 3장 이상의 이미지가 필요합니다.');
+      }
+
+      return absPaths;
+    } catch (error) {
+      await this.intrinsicRequestRepository.updateStatus(
+        intrinsicRequestId,
+        RequestStatus.Failed,
+        String(error.stdout || error.stderr || error.message),
+      );
+      ErrorHelper.handle(error);
+    }
+  }
+
+  async sendToAI(
+    imagePaths: { id: number; path: string }[],
+    topGuardId: number,
+    intrinsicRequestId: number,
+    boardCols: number,
+    boardRows: number,
+    inputType: 'squares' | 'corners',
+  ) {
+    try {
+      // const imageArg = imagePaths?.join(' ') || '';
+      const imageArg = imagePaths
+        .map((p) => {
+          return `${p.path} ${p.id}`;
+        })
+        .join(' ');
+
+      const command = `python3 src/scripts/camera_calibration.py --image-paths ${imageArg} --save-path ${process.env.IMAGE_SAVE_PATH}/${topGuardId}/result_images/${intrinsicRequestId} --board-cols ${boardCols} --board-rows ${boardRows} --input-type ${inputType}`;
 
       await this.intrinsicRequestRepository.updateStatus(
         intrinsicRequestId,
-        IntrinsicRequestStatus.Processing,
+        RequestStatus.Processing,
       );
 
       const { stdout, stderr } = await execAsync(command);
@@ -84,6 +128,20 @@ export class IntrinsicRequestService {
       if (!match) throw new Error('JSON 결과를 찾을 수 없습니다.');
       const calibrationResult = JSON.parse(match[0]) as CalibrationResult;
 
+      console.log('calibrationResult', calibrationResult.resultImageInfos);
+
+      const intrinsicResultImagePaths = calibrationResult.resultImageInfos.map(
+        (result_info) => ({
+          intrinsicSelectionId: result_info.id,
+          fileName: path.basename(result_info.path),
+        }),
+      );
+      await Promise.all(
+        intrinsicResultImagePaths.map((path) =>
+          this.intrinsicResultService.createIntrinsicOverlay(path),
+        ),
+      );
+
       const intrinsicResult = await this.intrinsicResultService.create({
         intrinsicRequestId: intrinsicRequestId,
         cameraMatrix: calibrationResult.cameraMatrix,
@@ -91,18 +149,28 @@ export class IntrinsicRequestService {
         usedImageCount: calibrationResult.usedImageCount,
         meanReprojectionError: calibrationResult.meanReprojectionError,
         perImageReprojectionError: calibrationResult.perImageReprojectionError,
-        resultImageFolder: `${process.env.IMAGE_SAVE_PATH}/${topGuardId}/result_images/${intrinsicRequestId}`,
       });
 
       if (intrinsicResult) {
+        const out = saveCalibrationYaml(
+          calibrationResult,
+          topGuardId,
+          intrinsicRequestId,
+        );
+        console.log('YAML saved to:', out);
+
         await this.intrinsicRequestRepository.updateStatus(
           intrinsicRequestId,
-          IntrinsicRequestStatus.Completed,
+          RequestStatus.Completed,
         );
+        void this.topGuardService.updateIntrinsicStage({
+          topGuardId,
+          intrinsicStage: StageEnum.ResultReceived,
+        });
       } else {
         await this.intrinsicRequestRepository.updateStatus(
           intrinsicRequestId,
-          IntrinsicRequestStatus.Failed,
+          RequestStatus.Failed,
           'IntrinsicResult 생성 실패',
         );
       }
@@ -110,14 +178,10 @@ export class IntrinsicRequestService {
       console.error('sendToAI 에러:', error);
       void this.intrinsicRequestRepository.updateStatus(
         intrinsicRequestId,
-        IntrinsicRequestStatus.Failed,
-        error.stdout || error.stderr || error.message,
+        RequestStatus.Failed,
+        String(error.stdout || error.stderr || error.message),
       );
     }
-  }
-
-  findAll() {
-    return `This action returns all intrinsicRequest`;
   }
 
   async findOne(id: number) {
@@ -129,11 +193,45 @@ export class IntrinsicRequestService {
     }
   }
 
-  update(id: number, updateIntrinsicRequestDto: any) {
-    return `This action updates a #${id} intrinsicRequest`;
+  async findTopGuardIdLatestRequest(topGuardId: number) {
+    try {
+      return await this.intrinsicRequestRepository.findTopGuardIdLatestRequest(
+        topGuardId,
+      );
+    } catch (error) {
+      console.error(error);
+      ErrorHelper.handle(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} intrinsicRequest`;
+  async findIntrinsicSelections(intrinsicRequestId: number) {
+    try {
+      return await this.intrinsicRequestRepository.findIntrinsicSelections(
+        intrinsicRequestId,
+      );
+    } catch (error) {
+      console.error(error);
+      ErrorHelper.handle(error);
+    }
+  }
+
+  async findIntrinsicCapture(intrinsicCaptureId: number) {
+    try {
+      return await this.intrinsicCaptureService.findOne(intrinsicCaptureId);
+    } catch (error) {
+      console.error(error);
+      ErrorHelper.handle(error);
+    }
+  }
+
+  async findTopGuardIdFailedRequests(topGuardId: number) {
+    try {
+      return await this.intrinsicRequestRepository.findTopGuardIdFailedRequests(
+        topGuardId,
+      );
+    } catch (error) {
+      console.error(error);
+      ErrorHelper.handle(error);
+    }
   }
 }

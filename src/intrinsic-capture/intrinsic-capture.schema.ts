@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const CreateIntrinsicCaptureSchema = z.object({
   captureRequestId: z.number().int().positive(),
-  imagePath: z.string(),
+  fileName: z.string(),
 });
 
 export type CreateIntrinsicCaptureInput = z.infer<
@@ -31,22 +31,6 @@ export type CalibrationResult = {
   };
 };
 
-class SelectionDto {
-  @ApiProperty({ type: Number, description: 'intrinsicCaptureId' })
-  intrinsicCaptureId: number;
-
-  @ApiProperty({ type: Boolean, description: '선택 여부' })
-  isSelected: boolean;
-}
-
-export class SelectionCaptureResponseDto {
-  @ApiProperty({
-    type: [SelectionDto],
-    description: '선택된 intrinsic capture 목록',
-  })
-  selections: SelectionDto[];
-}
-
 export class IntrinsicCaptureResponseDto {
   @ApiProperty({ type: Number, description: '캡처 이미지 ID' })
   id: number;
@@ -55,7 +39,7 @@ export class IntrinsicCaptureResponseDto {
   captureRequestId: number;
 
   @ApiProperty({ type: String, description: '캡처 이미지 경로' })
-  imagePath: string;
+  fileName: string;
 
   @ApiProperty({ type: Boolean, description: '캡처 이미지 선택 여부' })
   isSelected: boolean;

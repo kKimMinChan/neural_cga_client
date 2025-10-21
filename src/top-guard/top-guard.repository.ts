@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTopGuardInput, UpdateTopGuardInput } from './top-guard.schema';
+import {
+  CreateTopGuardInput,
+  UpdateIntrinsicStageInput,
+  UpdateTopGuardDto,
+} from './top-guard.schema';
 import { db } from 'src/db/db';
 import { topGuards, projects } from 'src/db/schema';
 import { eq, sql } from 'drizzle-orm';
@@ -46,11 +50,30 @@ export class TopGuardRepository {
       .where(eq(topGuards.projectId, projectId));
   }
 
-  async updateTopGuard(id: number, data: UpdateTopGuardInput) {
+  async updateTopGuard(data: UpdateTopGuardDto) {
+    const { id, name, webRtcUrl } = data as unknown as {
+      id: number;
+      name?: string;
+      webRtcUrl?: string;
+    };
+
+    const payload: Record<string, unknown> = {};
+    if (typeof name !== 'undefined') payload.name = name;
+    if (typeof webRtcUrl !== 'undefined') payload.webRtcUrl = webRtcUrl;
+
+    const updated = await db
+      .update(topGuards)
+      .set(payload)
+      .where(eq(topGuards.id, id))
+      .returning();
+    return updated[0];
+  }
+
+  async updateIntrinsicStage(data: UpdateIntrinsicStageInput) {
     const updated = await db
       .update(topGuards)
       .set(data)
-      .where(eq(topGuards.id, id))
+      .where(eq(topGuards.id, data.topGuardId))
       .returning();
     return updated[0];
   }

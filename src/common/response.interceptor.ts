@@ -36,12 +36,12 @@ export class ResponseInterceptor<T>
     const response = context.switchToHttp().getResponse();
     const request = context.switchToHttp().getRequest();
 
-    if (request.url.includes('/play')) {
-      console.log(
-        '[Interceptor] 비디오 스트리밍 요청 감지 - Interceptor 적용 안 함',
-      );
-      return next.handle();
-    }
+    // if (request.url.includes('/play')) {
+    //   console.log(
+    //     '[Interceptor] 비디오 스트리밍 요청 감지 - Interceptor 적용 안 함',
+    //   );
+    //   return next.handle();
+    // }
 
     return next.handle().pipe(
       map((responseData) => {
@@ -96,10 +96,10 @@ export class ResponseInterceptor<T>
           message,
           translate,
           result,
-          totalCount,
-          totalPages,
-          pageSize,
-          page,
+          ...(totalCount !== undefined && { totalCount }),
+          ...(totalPages !== undefined && { totalPages }),
+          ...(page !== undefined && { page }),
+          ...(pageSize !== undefined && { pageSize }),
           data:
             data == null
               ? ([] as unknown as T) // ✅ null 또는 undefined일 경우 빈 배열 반환

@@ -12,12 +12,13 @@ import { ResponseInterceptor } from './common/response.interceptor';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.useStaticAssets('/Users/kimminchan/Desktop/topGuardImage', {
-    prefix: '/topGuardImage/', // URL 경로
+  app.useStaticAssets('/Users/kimminchan/Desktop/top_guard_list', {
+    prefix: '/top_guard_list/', // URL 경로
   });
 
   app.enableCors({
@@ -26,13 +27,13 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('neuralCGA API Docs')
+    .setDescription('neuralCGA API description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('neuralCGA')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document, {
+  SwaggerModule.setup('api', app, cleanupOpenApiDoc(document), {
     swaggerOptions: {
       persistAuthorization: true,
       docExpansion: 'none',

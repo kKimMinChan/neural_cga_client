@@ -10,11 +10,11 @@ export class ExtrinsicCapturePairRepository {
     return await db.insert(extrinsicCaptures).values(data).returning();
   }
 
-  async findExtrinsicCapturePairsByTopGuardId(topGuardId: number) {
+  async findExtrinsicCapturePairsByTopGuardRid(topGuardRid: string) {
     const requests = await db
       .select()
       .from(extrinsicCaptureRequests)
-      .where(eq(extrinsicCaptureRequests.topGuardId, topGuardId));
+      .where(eq(extrinsicCaptureRequests.topGuardRid, topGuardRid));
 
     const captureRequestIds = requests.map((r) => r.id);
 

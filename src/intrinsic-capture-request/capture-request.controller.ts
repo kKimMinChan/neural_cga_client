@@ -46,7 +46,7 @@ export class CaptureRequestController {
     body: CaptureRequestInput,
   ) {
     const captureRequest = await this.captureRequestService.create({
-      topGuardId: body.topGuardId,
+      topGuardRid: body.topGuardRid,
       count: body.count,
     });
 
@@ -57,13 +57,13 @@ export class CaptureRequestController {
       body.topGuardBaseUrl,
       body.count,
       captureRequest.id,
-      body.topGuardId,
+      body.topGuardRid,
     );
 
     return { data: captureRequest };
   }
 
-  @Get('top-guards/:topGuardId')
+  @Get('top-guards/:topGuardRid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
       CaptureRequestResponseDto,
@@ -72,12 +72,12 @@ export class CaptureRequestController {
       true,
     ),
   )
-  async findCaptureRequestByTopGuardId(
-    @Param('topGuardId') topGuardId: string,
+  async findCaptureRequestByTopGuardRid(
+    @Param('topGuardRid') topGuardRid: string,
   ) {
     const captureRequest =
-      await this.captureRequestService.findCaptureRequestByTopGuardId(
-        +topGuardId,
+      await this.captureRequestService.findCaptureRequestByTopGuardRid(
+        topGuardRid,
       );
     return { data: captureRequest };
   }
@@ -96,13 +96,13 @@ export class CaptureRequestController {
     return { data: captureRequest };
   }
 
-  @Get('latest/:topGuardId') // 탑가드 아이디로 최신 요청 조회
+  @Get('latest/:topGuardRid') // 탑가드 RID로 최신 요청 조회
   async findTopGuardIdLatestCaptureRequest(
-    @Param('topGuardId') topGuardId: string,
+    @Param('topGuardRid') topGuardRid: string,
   ) {
     const result =
       await this.captureRequestService.findTopGuardIdLatestCaptureRequest(
-        +topGuardId,
+        topGuardRid,
       );
     return { data: result };
   }

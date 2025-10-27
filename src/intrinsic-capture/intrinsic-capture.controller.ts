@@ -10,7 +10,7 @@ export class IntrinsicCaptureController {
     private readonly intrinsicCaptureService: IntrinsicCaptureService,
   ) {}
 
-  @Get('top-guards/:topGuardId')
+  @Get('top-guards/:topGuardRid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
       IntrinsicCaptureResponseDto,
@@ -19,9 +19,9 @@ export class IntrinsicCaptureController {
       true,
     ),
   )
-  async findAll(@Param('topGuardId') topGuardId: string) {
+  async findAll(@Param('topGuardRid') topGuardRid: string) {
     const intrinsicCaptures =
-      await this.intrinsicCaptureService.findAll(+topGuardId);
+      await this.intrinsicCaptureService.findAll(topGuardRid);
     return { data: intrinsicCaptures };
   }
 

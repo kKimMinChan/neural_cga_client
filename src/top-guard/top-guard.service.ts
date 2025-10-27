@@ -2,10 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { TopGuardRepository } from './top-guard.repository';
 import {
   CreateTopGuardInput,
+  StageEnum,
   UpdateIntrinsicStageInput,
   UpdateTopGuardDto,
+  UpdateTopGuardInput,
 } from './top-guard.schema';
 import { ErrorHelper } from 'src/common/ErrorHelper';
+import { ulid } from 'ulid';
 
 @Injectable()
 export class TopGuardService {
@@ -13,32 +16,46 @@ export class TopGuardService {
 
   async create(body: CreateTopGuardInput) {
     try {
-      const topGuard = await this.topGuardRepository.createTopGuard(body);
+      const row = {
+        rid: ulid(),
+        ...body,
+        updatedAt: new Date().toISOString(),
+        nameVer: 0,
+        intrinsicStage: StageEnum.Created,
+        intrinsicStageVer: 0,
+        extrinsicStage: StageEnum.Created,
+        extrinsicStageVer: 0,
+      };
+      const topGuard = await this.topGuardRepository.createTopGuard(row);
       return topGuard;
     } catch (error) {
       ErrorHelper.handle(error);
     }
   }
 
-  async findAll(projectId: number) {
+  async update(body: UpdateTopGuardInput) {
+    try {
+      const updatedTopGuard =
+        await this.topGuardRepository.updateTopGuard(body);
+      return updatedTopGuard;
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
+
+  async findAll(projectRid: string) {
     try {
       const topGuards =
-        await this.topGuardRepository.findTopGuardByProjectId(projectId);
+        await this.topGuardRepository.findTopGuardByProjectRid(projectRid);
       return topGuards;
     } catch (error) {
       ErrorHelper.handle(error);
     }
   }
 
-  async findOne(id: number) {
-    const topGuard = await this.topGuardRepository.findTopGuardById(id);
-    return topGuard;
-  }
-
-  async update(body: UpdateTopGuardDto) {
+  async findTopGuardByRid(rid: string) {
     try {
-      console.log('body', body);
-      const topGuard = await this.topGuardRepository.updateTopGuard(body);
+      const topGuard = await this.topGuardRepository.findTopGuardByRid(rid);
       return topGuard;
     } catch (error) {
       ErrorHelper.handle(error);
@@ -54,9 +71,16 @@ export class TopGuardService {
     }
   }
 
-  async remove(id: number) {
+  async remove(rid: string) {
     try {
-      await this.topGuardRepository.deleteTopGuard(id);
+      await this.topGuardRepository.deleteTopGuard(rid);
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
+  async listSince(since?: string) {
+    try {
+      return await this.topGuardRepository.listSince(since);
     } catch (error) {
       ErrorHelper.handle(error);
     }

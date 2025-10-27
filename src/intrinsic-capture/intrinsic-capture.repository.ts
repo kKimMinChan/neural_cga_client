@@ -22,12 +22,12 @@ export class IntrinsicCaptureRepository {
       .then((res) => res[0]);
   }
 
-  async findIntrinsicCaptureByTopGuardId(topGuardId: number) {
+  async findIntrinsicCaptureByTopGuardRid(topGuardRid: string) {
     // 1. captureRequests에서 topGuardId가 같은 row의 id 목록을 가져옴
     const requests = await db
       .select({ id: captureRequests.id })
       .from(captureRequests)
-      .where(eq(captureRequests.topGuardId, topGuardId));
+      .where(eq(captureRequests.topGuardRid, topGuardRid));
 
     const captureRequestIds = requests.map((r) => r.id);
 

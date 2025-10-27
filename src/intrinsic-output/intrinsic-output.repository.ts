@@ -47,13 +47,13 @@ export class IntrinsicOutputRepository {
       .then((res) => res[0]);
   }
 
-  async findAll(topGuardId: number, pagination: PaginationInput) {
+  async findAll(topGuardRid: string, pagination: PaginationInput) {
     const requestIds = await db
       .select({ id: intrinsicRequests.id })
       .from(intrinsicRequests)
       .where(
         and(
-          eq(intrinsicRequests.topGuardId, topGuardId),
+          eq(intrinsicRequests.topGuardRid, topGuardRid),
           eq(intrinsicRequests.status, RequestStatus.Completed),
         ),
       )
@@ -71,13 +71,13 @@ export class IntrinsicOutputRepository {
     return results;
   }
 
-  async intrinsicOutputCount(topGuardId: number) {
+  async intrinsicOutputCount(topGuardRid: string) {
     const requestIds = await db
       .select({ id: intrinsicRequests.id })
       .from(intrinsicRequests)
       .where(
         and(
-          eq(intrinsicRequests.topGuardId, topGuardId),
+          eq(intrinsicRequests.topGuardRid, topGuardRid),
           eq(intrinsicRequests.status, RequestStatus.Completed),
         ),
       );
@@ -91,11 +91,11 @@ export class IntrinsicOutputRepository {
       .then((res) => res[0]?.count ?? 0);
   }
 
-  async findResultImages(topGuardId: number) {
+  async findResultImages(topGuardRid: string) {
     const requestIds = await db
       .select({ id: intrinsicRequests.id })
       .from(intrinsicRequests)
-      .where(eq(intrinsicRequests.topGuardId, topGuardId));
+      .where(eq(intrinsicRequests.topGuardRid, topGuardRid));
 
     const ids = requestIds.map((r) => r.id);
 

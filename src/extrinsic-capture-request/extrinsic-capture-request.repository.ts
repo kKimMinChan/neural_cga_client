@@ -42,11 +42,11 @@ export class ExtrinsicCaptureRequestRepository {
     return extrinsicCaptureRequest;
   }
 
-  async getLatestExtrinsicCaptureRequest(topGuardId: number) {
+  async getLatestExtrinsicCaptureRequest(topGuardRid: string) {
     const extrinsicCaptureRequest = await db
       .select()
       .from(extrinsicCaptureRequests)
-      .where(eq(extrinsicCaptureRequests.topGuardId, topGuardId))
+      .where(eq(extrinsicCaptureRequests.topGuardRid, topGuardRid))
       .orderBy(desc(extrinsicCaptureRequests.createdAt))
       .then((res) => res[0]);
     return extrinsicCaptureRequest;

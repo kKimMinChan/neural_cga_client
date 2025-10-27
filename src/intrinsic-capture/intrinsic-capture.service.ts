@@ -20,10 +20,10 @@ export class IntrinsicCaptureService {
     return await this.intrinsicCaptureRepo.createIntrinsicCapture(body);
   }
 
-  async findAll(topGuardId: number) {
+  async findAll(topGuardRid: string) {
     try {
-      return await this.intrinsicCaptureRepo.findIntrinsicCaptureByTopGuardId(
-        topGuardId,
+      return await this.intrinsicCaptureRepo.findIntrinsicCaptureByTopGuardRid(
+        topGuardRid,
       );
     } catch (error) {
       ErrorHelper.handle(error);

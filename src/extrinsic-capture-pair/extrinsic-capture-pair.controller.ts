@@ -19,13 +19,13 @@ export class ExtrinsicCapturePairController {
       true,
     ),
   )
-  @Get('top-guards/:topGuardId')
+  @Get('top-guards/:topGuardRid')
   async findExtrinsicCapturePairsByTopGuardId(
-    @Param('topGuardId') topGuardId: string,
+    @Param('topGuardRid') topGuardRid: string,
   ) {
     const extrinsicCapturePairs =
-      await this.extrinsicCapturePairService.findExtrinsicCapturePairsByTopGuardId(
-        +topGuardId,
+      await this.extrinsicCapturePairService.findExtrinsicCapturePairsByTopGuardRid(
+        topGuardRid,
       );
     return { data: extrinsicCapturePairs };
   }

@@ -37,15 +37,15 @@ export class IntrinsicOutputService {
     return this.intrinsicOutputRepository.createIntrinsicResult(body);
   }
 
-  async findAll(topGuardId: number, pagination: PaginationInput) {
+  async findAll(topGuardRid: string, pagination: PaginationInput) {
     try {
       const { limit, page } = pagination;
 
       const totalCount =
-        await this.intrinsicOutputRepository.intrinsicOutputCount(topGuardId);
+        await this.intrinsicOutputRepository.intrinsicOutputCount(topGuardRid);
 
       const results = await this.intrinsicOutputRepository.findAll(
-        topGuardId,
+        topGuardRid,
         pagination,
       );
 
@@ -98,9 +98,9 @@ export class IntrinsicOutputService {
     }
   }
 
-  async findResultImages(topGuardId: number) {
+  async findResultImages(topGuardRid: string) {
     try {
-      return await this.intrinsicOutputRepository.findResultImages(topGuardId);
+      return await this.intrinsicOutputRepository.findResultImages(topGuardRid);
     } catch (error) {
       console.error(error);
       ErrorHelper.handle(error);
@@ -119,15 +119,15 @@ export class IntrinsicOutputService {
 
     if (result) {
       await this.topGuardService.updateIntrinsicStage({
-        topGuardId: body.topGuardId,
+        topGuardRid: body.topGuardRid,
         intrinsicStage: StageEnum.Finalized,
       });
     }
     return result;
   }
 
-  async sendYaml(intrinsicRequestId: string, topGuardId: string) {
-    const result = await sendYaml(topGuardId, intrinsicRequestId);
+  async sendYaml(intrinsicRequestId: number, topGuardRid: string) {
+    const result = await sendYaml(topGuardRid, intrinsicRequestId);
     return result;
   }
 

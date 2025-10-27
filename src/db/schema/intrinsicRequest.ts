@@ -18,9 +18,11 @@ export const intrinsicRequestStatusEnum = pgEnum('intrinsic_request_status', [
 
 export const intrinsicRequests = pgTable('intrinsic_requests', {
   id: serial('id').primaryKey(),
-  topGuardId: integer('top_guard_id').references(() => topGuards.id, {
-    onDelete: 'cascade',
-  }),
+  topGuardRid: text('top_guard_rid')
+    .notNull()
+    .references(() => topGuards.rid, {
+      onDelete: 'cascade',
+    }),
   status: intrinsicRequestStatusEnum('intrinsic_request_status').default(
     'requested',
   ),

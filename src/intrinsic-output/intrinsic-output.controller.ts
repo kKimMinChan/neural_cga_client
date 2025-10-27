@@ -13,11 +13,8 @@ import { ApiBody, ApiExtraModels, ApiResponse } from '@nestjs/swagger';
 import {
   IntrinsicOutputIsFinalInput,
   IntrinsicOutputIsFinalRequestDto,
-  IntrinsicOutputWithPairsDto,
-  IntrinsicOutputResponseSchema,
   IntrinsicOutputWithPairsSchema,
   IntrinsicOutputWithoutPairsSchema,
-  IntrinsicOutputWithoutPairsDto,
 } from './intrinsic-output.schema';
 import { SwaggerHelper } from 'src/common/SwaggerHelper';
 import { PaginationDto, PaginationSchema } from 'src/common/Pagination.schema';
@@ -43,13 +40,13 @@ export class IntrinsicOutputController {
     private readonly intrinsicOutputService: IntrinsicOutputService,
   ) {}
 
-  @Get('top-guards/:topGuardId')
+  @Get('top-guards/:topGuardRid')
   @ZodResponse({ type: GetPageDto as any })
   async topGuardIntrinsicOutputFindAll(
-    @Param('topGuardId') topGuardId: string,
+    @Param('topGuardRid') topGuardRid: string,
     @Query(new ZodValidationPipe(PaginationSchema)) pagination: PaginationDto,
   ) {
-    return await this.intrinsicOutputService.findAll(+topGuardId, pagination);
+    return await this.intrinsicOutputService.findAll(topGuardRid, pagination);
   }
 
   @Post('is-final')
@@ -63,9 +60,12 @@ export class IntrinsicOutputController {
   @Post('yaml')
   async sendYaml(
     @Query('intrinsicRequestId') intrinsicRequestId: string,
-    @Query('topGuardId') topGuardId: string,
+    @Query('topGuardRid') topGuardRid: string,
   ) {
-    await this.intrinsicOutputService.sendYaml(intrinsicRequestId, topGuardId);
+    await this.intrinsicOutputService.sendYaml(
+      +intrinsicRequestId,
+      topGuardRid,
+    );
     return {
       translate: '성공적으로 전송 되었습니다.',
     };

@@ -3,7 +3,7 @@ import { RequestStatus } from 'src/common/type/request-status';
 import { z } from 'zod';
 
 export const IntrinsicSelectionsSchema = z.object({
-  topGuardId: z.number().int().positive(),
+  topGuardRid: z.string(),
   intrinsicCaptureIds: z.array(z.number().int().positive()),
   boardCols: z.number().int().positive(),
   boardRows: z.number().int().positive(),
@@ -20,7 +20,7 @@ export type CreateIntrinsicSelectionsInput = z.infer<
 >;
 
 export const CreateIntrinsicRequestSchema = z.object({
-  topGuardId: z.number().int().positive(),
+  topGuardRid: z.string(),
 });
 
 export type CreateIntrinsicRequestInput = z.infer<
@@ -44,8 +44,8 @@ export type CalibrationResult = {
 };
 
 export class IntrinsicSelectionsDto {
-  @ApiProperty({ type: Number, description: '탑가드 ID' })
-  topGuardId: number;
+  @ApiProperty({ type: String, description: '탑가드 RID' })
+  topGuardRid: string;
 
   @ApiProperty({
     type: 'array',
@@ -78,8 +78,8 @@ export class IntrinsicRequestResponseDto {
   @ApiProperty({ type: Number, description: '내부 캡처 요청 ID' })
   id: number;
 
-  @ApiProperty({ type: Number, description: '탑가드 ID' })
-  topGuardId: number;
+  @ApiProperty({ type: String, description: '탑가드 RID' })
+  topGuardRid: string;
 
   @ApiProperty({ type: String, description: '상태' })
   status: RequestStatus;
@@ -87,6 +87,6 @@ export class IntrinsicRequestResponseDto {
   @ApiProperty({ type: String, description: '오류 메시지' })
   errorMessage: string;
 
-  @ApiProperty({ type: Date, description: '생성일' })
-  createdAt: Date;
+  @ApiProperty({ type: String, description: '생성일' })
+  createdAt: string;
 }

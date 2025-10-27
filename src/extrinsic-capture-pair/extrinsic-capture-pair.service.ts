@@ -14,10 +14,10 @@ export class ExtrinsicCapturePairService {
     return this.extrinsicCapturePairRepository.createExtrinsicCapturePair(body);
   }
 
-  async findExtrinsicCapturePairsByTopGuardId(topGuardId: number) {
+  async findExtrinsicCapturePairsByTopGuardRid(topGuardRid: string) {
     const extrinsicCapturePairs =
-      await this.extrinsicCapturePairRepository.findExtrinsicCapturePairsByTopGuardId(
-        topGuardId,
+      await this.extrinsicCapturePairRepository.findExtrinsicCapturePairsByTopGuardRid(
+        topGuardRid,
       );
 
     return extrinsicCapturePairs;

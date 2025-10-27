@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const LoginSchema = z.object({
@@ -6,3 +7,14 @@ export const LoginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof LoginSchema>;
+
+export const loginLogoutSchema = z.object({
+  userId: z.number().int().positive(),
+  companyId: z.number().int().positive(),
+  accessToken: z.string(),
+  name: z.string(),
+  role: z.enum(['admin', 'user', 'superAdmin']),
+});
+
+export type loginLogoutInput = z.infer<typeof loginLogoutSchema>;
+export class LoginLogoutDto extends createZodDto(loginLogoutSchema) {}

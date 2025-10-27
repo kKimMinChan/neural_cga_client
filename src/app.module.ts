@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { UserSyncModule } from './sync/user-sync/user-sync.module';
 import { NetworkMonitorModule } from './network-monitor/network-monitor.module';
 import { TokenStoreModule } from './token-store/token-store.module';
 import { AuthModule } from './auth/auth.module';
@@ -18,10 +16,9 @@ import { ExtrinsicCapturePairModule } from './extrinsic-capture-pair/extrinsic-c
 import { ExtrinsicCaptureRequestModule } from './extrinsic-capture-request/extrinsic-capture-request.module';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { SyncModule } from './sync/sync.module';
 @Module({
   imports: [
-    UserModule,
-    UserSyncModule,
     NetworkMonitorModule,
     TokenStoreModule,
     AuthModule,
@@ -35,6 +32,7 @@ import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
     IntrinsicOutputModule,
     ExtrinsicCapturePairModule,
     ExtrinsicCaptureRequestModule,
+    SyncModule,
   ],
   controllers: [AppController],
   providers: [

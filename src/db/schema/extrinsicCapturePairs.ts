@@ -1,12 +1,4 @@
-import {
-  integer,
-  pgTable,
-  serial,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
-import { topGuards } from './topGuard';
+import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { extrinsicCaptureRequests } from './extrinsicCaptureRequest';
 
 export const extrinsicCaptures = pgTable('extrinsic_captures', {

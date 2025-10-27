@@ -35,7 +35,7 @@ export class IntrinsicRequestService {
     try {
       const intrinsicRequest =
         await this.intrinsicRequestRepository.createIntrinsicRequest({
-          topGuardId: body.topGuardId,
+          topGuardRid: body.topGuardRid,
         });
       return intrinsicRequest;
     } catch (error) {
@@ -46,7 +46,7 @@ export class IntrinsicRequestService {
   async createSelectionImages(
     intrinsicRequestId: number,
     intrinsicCaptureIds: number[],
-    topGuardId: number,
+    topGuardRid: string,
   ) {
     try {
       const selections = await Promise.all(
@@ -71,7 +71,7 @@ export class IntrinsicRequestService {
       const imagePaths = selections
         .filter((v): v is { id: number; imagePath: string } => v !== null)
         .map((v) => v);
-      const desktopPath = `${process.env.IMAGE_SAVE_PATH}/${topGuardId}/capture_images`;
+      const desktopPath = `${process.env.IMAGE_SAVE_PATH}/${topGuardRid}/capture_images`;
       const absPaths = imagePaths.map((p) => ({
         id: p.id,
         path: path.resolve(desktopPath, p.imagePath),
@@ -94,7 +94,7 @@ export class IntrinsicRequestService {
 
   async sendToAI(
     imagePaths: { id: number; path: string }[],
-    topGuardId: number,
+    topGuardRid: string,
     intrinsicRequestId: number,
     boardCols: number,
     boardRows: number,
@@ -108,7 +108,7 @@ export class IntrinsicRequestService {
         })
         .join(' ');
 
-      const command = `python3 src/scripts/camera_calibration.py --image-paths ${imageArg} --save-path ${process.env.IMAGE_SAVE_PATH}/${topGuardId}/result_images/${intrinsicRequestId} --board-cols ${boardCols} --board-rows ${boardRows} --input-type ${inputType}`;
+      const command = `python3 src/scripts/camera_calibration.py --image-paths ${imageArg} --save-path ${process.env.IMAGE_SAVE_PATH}/${topGuardRid}/result_images/${intrinsicRequestId} --board-cols ${boardCols} --board-rows ${boardRows} --input-type ${inputType}`;
 
       await this.intrinsicRequestRepository.updateStatus(
         intrinsicRequestId,
@@ -154,7 +154,7 @@ export class IntrinsicRequestService {
       if (intrinsicResult) {
         const out = saveCalibrationYaml(
           calibrationResult,
-          topGuardId,
+          topGuardRid,
           intrinsicRequestId,
         );
         console.log('YAML saved to:', out);
@@ -164,7 +164,7 @@ export class IntrinsicRequestService {
           RequestStatus.Completed,
         );
         void this.topGuardService.updateIntrinsicStage({
-          topGuardId,
+          topGuardRid,
           intrinsicStage: StageEnum.ResultReceived,
         });
       } else {
@@ -193,10 +193,10 @@ export class IntrinsicRequestService {
     }
   }
 
-  async findTopGuardIdLatestRequest(topGuardId: number) {
+  async findTopGuardIdLatestRequest(topGuardRid: string) {
     try {
       return await this.intrinsicRequestRepository.findTopGuardIdLatestRequest(
-        topGuardId,
+        topGuardRid,
       );
     } catch (error) {
       console.error(error);
@@ -224,10 +224,10 @@ export class IntrinsicRequestService {
     }
   }
 
-  async findTopGuardIdFailedRequests(topGuardId: number) {
+  async findTopGuardIdFailedRequests(topGuardRid: string) {
     try {
       return await this.intrinsicRequestRepository.findTopGuardIdFailedRequests(
-        topGuardId,
+        topGuardRid,
       );
     } catch (error) {
       console.error(error);

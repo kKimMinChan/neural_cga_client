@@ -9,6 +9,10 @@ import {
   TopGuardPostSchema,
   User,
   OutboxType,
+  PatchResult,
+  StageEnum,
+  UpsertTopGuard,
+  UpsertProject,
 } from './sync.schema';
 import axios, { AxiosError } from 'axios';
 import { db } from 'src/db/db';
@@ -17,6 +21,7 @@ import { eq } from 'drizzle-orm';
 import { parseWith } from 'src/common/zod-parse';
 import { ErrorHelper } from 'src/common/ErrorHelper';
 import { AuthService } from 'src/auth/auth.service';
+import { SyncRepository } from './sync.repository';
 
 @Injectable()
 export class SyncService {
@@ -24,14 +29,8 @@ export class SyncService {
     private readonly projectService: ProjectService,
     private readonly topGuardService: TopGuardService,
     private readonly authService: AuthService,
+    private readonly syncRepository: SyncRepository,
   ) {}
-
-  getDelta(since?: string) {
-    return Promise.all([
-      this.projectService.listSince(since),
-      this.topGuardService.listSince(since),
-    ]).then(([projects, topGuards]) => ({ projects, topGuards }));
-  }
 
   async post(): Promise<any> {
     try {
@@ -47,7 +46,7 @@ export class SyncService {
 
       if (pendingOutboxes.length <= 0) {
         console.warn('No pending outboxes found', pendingOutboxes);
-        return { applied: { projects: 0, topGuards: 0 }, latest: null };
+        return { applied: {} };
       }
 
       // console.log('pendingOutboxes', pendingOutboxes);
@@ -102,9 +101,9 @@ export class SyncService {
           }),
       };
 
-      console.log('projects', payload.projects);
-      console.log('topGuards', payload.topGuards);
-      console.log('payload', payload);
+      // console.log('projects', payload.projects);
+      // console.log('topGuards', payload.topGuards);
+      // console.log('payload', payload);
 
       const response = await axios.post(
         'http://localhost:4001/sync/push',
@@ -117,32 +116,108 @@ export class SyncService {
         },
       );
 
+      // console.log('response', response.data.data[0]);
+      // console.log('response', response.data.data[0].applied);
+      // console.log('outboxes', pendingOutboxes);
+
+      if (response.data.result === true) {
+        const projects = response.data.data[0].applied.projects;
+        const topGuards = response.data.data[0].applied.topGuards;
+
+        console.log('projects', projects);
+        console.log('topGuards', topGuards);
+
+        for (const p of projects) {
+          const { opId, finalRow } = p as PatchResult;
+          await this.projectService.upsert(finalRow as UpsertProject);
+          const outbox = pendingOutboxes.find((o) => o.opId === opId);
+          if (outbox) {
+            await db
+              .update(outboxes)
+              .set({ status: OutboxStatus.Done })
+              .where(eq(outboxes.opId, opId));
+          }
+        }
+        for (const t of topGuards) {
+          const { opId, finalRow } = t as PatchResult;
+          await this.topGuardService.upsert(finalRow as UpsertTopGuard);
+          const outbox = pendingOutboxes.find((o) => o.opId === opId);
+          if (outbox) {
+            await db
+              .update(outboxes)
+              .set({ status: OutboxStatus.Done })
+              .where(eq(outboxes.opId, opId));
+          }
+        }
+
+        if (response.data.data[0].serverNow !== undefined) {
+          await this.syncRepository.updateLastSyncedAt(
+            response.data.data[0].serverNow as string,
+          );
+        }
+      }
+
       return response.data;
     } catch (error) {
       ErrorHelper.handle(error);
     }
   }
 
-  // LWW: updatedAt 큰 쪽 적용
-  async push(dto: SyncPushDto) {
-    const pCnt = 0,
-      tCnt = 0;
-
-    // for (const p of dto.projects) {
-    //   await this.projectService.upsert(p);
-    //   pCnt++;
-    // }
-    // for (const t of dto.topGuards) {
-    //   // 서버에 없는 projectRid로 오면 FK 제약으로 에러 → 먼저 프로젝트가 push되어야 함
-    //   await this.topGuardService.upsert(t);
-    //   tCnt++;
-    // }
-    const latest = await this.getDelta(undefined);
-    return { applied: { projects: pCnt, topGuards: tCnt }, latest };
-  }
-
   async getOutboxes(): Promise<any> {
     const response = await db.select().from(outboxes);
     return { data: response };
+  }
+
+  async getDelta(): Promise<any> {
+    const since = await this.syncRepository.getLastSyncedAt();
+    console.log('since', since);
+
+    const latestLoginLog = await this.authService.latestLoginLog();
+    const user = latestLoginLog[0];
+    if (!user || !user.companyId || !user.userId) {
+      throw new Error('No user found');
+    }
+
+    const response = await axios.get(
+      `http://localhost:4001/sync/delta?since=${since === undefined ? '' : since}&companyId=${user.companyId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+        },
+      },
+    );
+
+    if (response.data.result === true) {
+      console.log('response.data.data[0]', response.data.data[0]);
+      const projects = response.data.data[0].latest.projects;
+      const topGuards = response.data.data[0].latest.topGuards;
+
+      console.log('projects', projects);
+      console.log('topGuards', topGuards);
+      for (const p of projects) {
+        const { createdAt, ...rest } = p;
+        await this.projectService.upsert(rest as UpsertProject);
+      }
+      for (const t of topGuards) {
+        const { createdAt, ...rest } = t;
+        await this.topGuardService.upsert(rest as UpsertTopGuard);
+      }
+
+      if (response.data.data[0].serverNow !== undefined) {
+        await this.syncRepository.updateLastSyncedAt(
+          response.data.data[0].serverNow as string,
+        );
+      }
+    }
+    return response.data.data;
+  }
+
+  async getLastSyncedAt(): Promise<any> {
+    try {
+      const lastSyncedAt = await this.syncRepository.getLastSyncedAt();
+      return lastSyncedAt;
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
   }
 }

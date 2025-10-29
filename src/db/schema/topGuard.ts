@@ -50,7 +50,7 @@ export const topGuards = pgTable(
     intrinsicStageVer: integer('intrinsic_stage_ver').notNull().default(0),
     extrinsicStage: StageEnum('extrinsic_stage').default('created'),
     extrinsicStageVer: integer('extrinsic_stage_ver').notNull().default(0),
-    failureStage: RequestKindEnum('failure_stage').default('none'),
+    // failureStage: RequestKindEnum('failure_stage').default('none'),
     createdBy: integer('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { mode: 'string' }).notNull(), // ISO

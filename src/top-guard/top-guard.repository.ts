@@ -126,8 +126,6 @@ export class TopGuardRepository {
           ),
         );
 
-      console.log('preOutbox', preOutbox);
-
       if (!preOutbox) {
         const [outbox] = await tx
           .insert(outboxes)
@@ -172,6 +170,33 @@ export class TopGuardRepository {
       return { topGuard: updatedTopGuard, outbox };
     });
     return result;
+  }
+
+  async upsertTopGuard(row: {
+    rid: string;
+    projectRid: string;
+    name: string;
+    nameVer: number;
+    intrinsicStage: StageEnum;
+    intrinsicStageVer: number;
+    extrinsicStage: StageEnum;
+    extrinsicStageVer: number;
+  }) {
+    await db
+      .insert(topGuards)
+      .values({ ...row, updatedAt: new Date().toISOString() })
+      .onConflictDoUpdate({
+        target: topGuards.rid,
+        set: {
+          name: sql`excluded.name`,
+          nameVer: sql`excluded.name_ver`,
+          intrinsicStage: sql`excluded.intrinsic_stage`,
+          intrinsicStageVer: sql`excluded.intrinsic_stage_ver`,
+          extrinsicStage: sql`excluded.extrinsic_stage`,
+          extrinsicStageVer: sql`excluded.extrinsic_stage_ver`,
+          updatedAt: sql`excluded.updated_at`,
+        },
+      });
   }
 
   async findTopGuardByRid(rid: string) {

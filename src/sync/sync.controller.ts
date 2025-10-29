@@ -19,6 +19,11 @@ export class SyncController {
     return { data: await this.syncService.post() };
   }
 
+  @Get('delta')
+  async getDelta(): Promise<any> {
+    return { data: await this.syncService.getDelta() };
+  }
+
   @Get('outboxes')
   async getOutboxes(): Promise<any> {
     return { data: await this.syncService.getOutboxes() };

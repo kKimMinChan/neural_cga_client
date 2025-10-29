@@ -35,6 +35,20 @@ export class ProjectService {
     }
   }
 
+  async upsert(body: {
+    rid: string;
+    name: string;
+    nameVer: number;
+    companyId: number;
+    createdBy: number;
+  }) {
+    try {
+      return await this.projectRepo.upsert(body);
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
+
   async findAll() {
     try {
       return await this.projectRepo.findAll();

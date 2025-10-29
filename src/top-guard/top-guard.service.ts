@@ -43,6 +43,23 @@ export class TopGuardService {
     }
   }
 
+  async upsert(body: {
+    rid: string;
+    projectRid: string;
+    name: string;
+    nameVer: number;
+    intrinsicStage: StageEnum;
+    intrinsicStageVer: number;
+    extrinsicStage: StageEnum;
+    extrinsicStageVer: number;
+  }) {
+    try {
+      return await this.topGuardRepository.upsertTopGuard(body);
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
+
   async findAll(projectRid: string) {
     try {
       const topGuards =

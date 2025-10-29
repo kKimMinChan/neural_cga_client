@@ -120,6 +120,30 @@ export class ProjectRepository {
     return result as { project: Project; outbox: Outbox };
   }
 
+  async upsert(row: {
+    rid: string;
+    name: string;
+    nameVer: number;
+    companyId: number;
+    createdBy: number;
+  }) {
+    try {
+      return await db
+        .insert(projects)
+        .values({ ...row, updatedAt: new Date().toISOString() })
+        .onConflictDoUpdate({
+          target: [projects.rid],
+          set: {
+            name: sql`excluded.name`,
+            nameVer: sql`excluded.name_ver`,
+            updatedAt: sql`excluded.updated_at`,
+          },
+        });
+    } catch (error) {
+      console.log('error', error);
+    }
+  }
+
   async findAll(): Promise<Project[]> {
     return (await db.select().from(projects)) as Project[];
   }

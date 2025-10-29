@@ -128,3 +128,35 @@ export const UserSchema = z
 
 export class UserDto extends createZodDto(UserSchema) {}
 export type User = z.infer<typeof UserSchema>;
+
+export interface PatchResult {
+  opId: string;
+  applied: Record<string, { value: any; ver: number | null }>;
+  conflicts: Record<string, { current: { value: any; ver: number | null } }>;
+  finalRow: any;
+}
+
+export const UpsertProjectSchema = z.object({
+  rid: z.string(),
+  companyId: z.number().int().positive(),
+  name: z.string().min(1),
+  nameVer: z.number().int().min(0),
+  createdBy: z.number().int().positive(),
+  // updatedAt: z.string(),
+});
+export class UpsertProjectDto extends createZodDto(UpsertProjectSchema) {}
+export type UpsertProject = z.infer<typeof UpsertProjectSchema>;
+
+export const UpsertTopGuardSchema = z.object({
+  rid: z.string(),
+  projectRid: z.string(),
+  name: z.string().min(1),
+  nameVer: z.number().int().min(0),
+  intrinsicStage: z.nativeEnum(StageEnum),
+  intrinsicStageVer: z.number().int().min(0),
+  extrinsicStage: z.nativeEnum(StageEnum),
+  extrinsicStageVer: z.number().int().min(0),
+  // updatedAt: z.string(),
+});
+export class UpsertTopGuardDto extends createZodDto(UpsertTopGuardSchema) {}
+export type UpsertTopGuard = z.infer<typeof UpsertTopGuardSchema>;

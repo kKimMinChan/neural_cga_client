@@ -44,10 +44,10 @@ export class CaptureRequestService {
     // ip: string,
     count: number,
     captureRequestId: number,
-    topGuardId: number,
+    topGuardRid: string,
   ) {
     try {
-      const folder = `top_guard_list/${topGuardId}/capture_images`;
+      const folder = `top_guard_list/${topGuardRid}/capture_images`;
 
       const destinationDir = path.join(getDesktopPath(), folder);
       if (!fs.existsSync(destinationDir)) {
@@ -133,7 +133,7 @@ export class CaptureRequestService {
       );
 
       void this.topGuardService.updateIntrinsicStage({
-        topGuardId,
+        topGuardRid,
         intrinsicStage: StageEnum.Captured,
       });
     } catch (error) {
@@ -163,11 +163,11 @@ export class CaptureRequestService {
     }
   }
 
-  async findCaptureRequestByTopGuardId(topGuardId: number) {
+  async findCaptureRequestByTopGuardRid(topGuardRid: string) {
     try {
       const captureRequest =
-        await this.captureRequestRepository.findCaptureRequestByTopGuardId(
-          topGuardId,
+        await this.captureRequestRepository.findCaptureRequestByTopGuardRid(
+          topGuardRid,
         );
       return captureRequest;
     } catch (error) {
@@ -185,11 +185,11 @@ export class CaptureRequestService {
     }
   }
 
-  async findTopGuardIdLatestCaptureRequest(topGuardId: number) {
+  async findTopGuardIdLatestCaptureRequest(topGuardRid: string) {
     try {
       const captureRequest =
         await this.captureRequestRepository.findTopGuardIdLatestCaptureRequest(
-          topGuardId,
+          topGuardRid,
         );
       return captureRequest;
     } catch (error) {

@@ -21,7 +21,7 @@ export const IntrinsicOutputSchema = z.object({
 export type IntrinsicOutputInput = z.infer<typeof IntrinsicOutputSchema>;
 
 export const IntrinsicOutputIsFinalSchema = z.object({
-  topGuardId: z.number().int().positive(),
+  topGuardRid: z.string(),
   intrinsicRequestId: z.number().int().positive(),
   isFinal: z.boolean(),
 });

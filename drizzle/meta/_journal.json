@@ -1,0 +1,19 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1761199150028,
+      "tag": "0000_rainy_hobgoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "tag": "0001_add_outbox_delete_triggers",
+      "when": 1761199250000,
+      "breakpoints": true
+    }
+  ]
+}

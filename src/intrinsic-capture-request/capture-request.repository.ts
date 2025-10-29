@@ -32,22 +32,22 @@ export class CaptureRequestRepository {
       .then((res) => res[0]);
   }
 
-  async findCaptureRequestByTopGuardId(topGuardId: number) {
+  async findCaptureRequestByTopGuardRid(topGuardRid: string) {
     const [captureRequest] = await db
       .select()
       .from(captureRequests)
-      .where(eq(captureRequests.topGuardId, topGuardId))
+      .where(eq(captureRequests.topGuardRid, topGuardRid))
       .orderBy(desc(captureRequests.createdAt))
       .limit(1);
 
     return captureRequest;
   }
 
-  async findTopGuardIdLatestCaptureRequest(topGuardId: number) {
+  async findTopGuardIdLatestCaptureRequest(topGuardRid: string) {
     return await db
       .select()
       .from(captureRequests)
-      .where(eq(captureRequests.topGuardId, topGuardId))
+      .where(eq(captureRequests.topGuardRid, topGuardRid))
       .orderBy(desc(captureRequests.createdAt))
       .limit(1)
       .then((res) => res[0]);

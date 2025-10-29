@@ -48,22 +48,22 @@ export class IntrinsicRequestRepository {
       .where(eq(intrinsicSelections.intrinsicRequestId, intrinsicRequestId));
   }
 
-  async findTopGuardIdLatestRequest(topGuardId: number) {
+  async findTopGuardIdLatestRequest(topGuardRid: string) {
     return await db
       .select()
       .from(intrinsicRequests)
-      .where(eq(intrinsicRequests.topGuardId, topGuardId))
+      .where(eq(intrinsicRequests.topGuardRid, topGuardRid))
       .orderBy(desc(intrinsicRequests.createdAt))
       .limit(1);
   }
 
-  async findTopGuardIdFailedRequests(topGuardId: number) {
+  async findTopGuardIdFailedRequests(topGuardRid: string) {
     return await db
       .select()
       .from(intrinsicRequests)
       .where(
         and(
-          eq(intrinsicRequests.topGuardId, topGuardId),
+          eq(intrinsicRequests.topGuardRid, topGuardRid),
           eq(intrinsicRequests.status, RequestStatus.Failed),
         ),
       );

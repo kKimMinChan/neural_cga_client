@@ -3,12 +3,12 @@ import { RequestStatus } from 'src/common/type/request-status';
 import { z } from 'zod';
 
 export const CreateCaptureRequestSchema = z.object({
-  topGuardId: z.number(),
+  topGuardRid: z.string(),
   count: z.number(),
 });
 
 export const CaptureRequestToTopGuardSchema = z.object({
-  topGuardId: z.number().int().positive(),
+  topGuardRid: z.string(),
   count: z.number().int().positive(),
   // streamPath: z.string(),
   // ip: z.string(),
@@ -25,16 +25,16 @@ export type CaptureRequestInput = z.infer<
 >;
 
 export class CreateCaptureRequestDto {
-  @ApiProperty({ type: Number, description: '캡처 요청 탑가드 ID' })
-  topGuardId: number;
+  @ApiProperty({ type: String, description: '캡처 요청 탑가드 RID' })
+  topGuardRid: string;
 
   @ApiProperty({ type: Number, description: '캡처 요청 카운트' })
   count: number;
 }
 
 export class CaptureRequestToTopGuardDto {
-  @ApiProperty({ type: Number, description: '캡처 요청 탑가드 ID' })
-  topGuardId: number;
+  @ApiProperty({ type: String, description: '캡처 요청 탑가드 RID' })
+  topGuardRid: string;
 
   @ApiProperty({ type: Number, description: '캡처 요청 카운트' })
   count: number;
@@ -50,8 +50,8 @@ export class CaptureRequestResponseDto {
   @ApiProperty({ type: Number, description: '캡처 요청 ID' })
   id: number;
 
-  @ApiProperty({ type: Number, description: '캡처 요청 탑가드 ID' })
-  topGuardId: number;
+  @ApiProperty({ type: String, description: '캡처 요청 탑가드 RID' })
+  topGuardRid: string;
 
   @ApiProperty({ type: Number, description: '캡처 요청 카운트' })
   count: number;

@@ -2,15 +2,20 @@ import { ApiProperty } from '@nestjs/swagger';
 import { z } from 'zod';
 
 export const BaseProjectSchema = z.object({
-  id: z.number(),
+  rid: z.string(),
   name: z.string().describe('프로젝트 이름'),
   topGuardCount: z.number(),
+  nameVer: z.number(),
   createdAt: z.date(),
-  updatedAt: z.date(),
+  updatedAt: z.string(),
+  createdBy: z.number().int().positive().nullable(),
+  companyId: z.number().int().positive().nullable(),
 });
 
 export const CreateProjectSchema = BaseProjectSchema.pick({
   name: true,
+  // createdBy: true,
+  // companyId: true,
 });
 
 export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
@@ -23,7 +28,7 @@ export class CreateProjectDto {
 
 export class BaseProjectDto {
   @ApiProperty({ type: Number, description: '프로젝트 ID' })
-  id: number;
+  rid: string;
 
   @ApiProperty({ type: String, description: '프로젝트 이름' })
   name: string;
@@ -35,5 +40,5 @@ export class BaseProjectDto {
   createdAt: Date;
 
   @ApiProperty({ type: Date, description: '수정일' })
-  updatedAt: Date;
+  updatedAt: string;
 }

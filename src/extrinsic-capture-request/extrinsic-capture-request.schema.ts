@@ -3,7 +3,7 @@ import { RequestStatus } from 'src/common/type/request-status';
 import { ApiProperty } from '@nestjs/swagger';
 
 export const ExtrinsicCaptureRequestInput = z.object({
-  topGuardId: z.number(),
+  topGuardRid: z.string(),
   topGuardBaseUrl: z.string().default('default'),
   mode: z.enum(['short', 'long']),
 });
@@ -13,7 +13,7 @@ export type ExtrinsicCaptureRequestInput = z.infer<
 >;
 
 export const CreateExtrinsicCaptureRequestInput = z.object({
-  topGuardId: z.number(),
+  topGuardRid: z.string(),
   mode: z.enum(['short', 'long']),
 });
 
@@ -33,11 +33,11 @@ export type UpdateExtrinsicCaptureRequestInput = z.infer<
 
 export class ExtrinsicCaptureRequestDto {
   @ApiProperty({
-    type: Number,
-    description: '탑 가드 ID',
-    example: 1,
+    type: String,
+    description: '탑 가드 RID',
+    example: '1',
   })
-  topGuardId: number;
+  topGuardRid: string;
 
   @ApiProperty({
     type: String,
@@ -54,8 +54,8 @@ export class ExtrinsicCaptureRequestResponseDto {
   @ApiProperty({ type: Number, description: '캡처 요청 ID', example: 1 })
   id: number;
 
-  @ApiProperty({ type: Number, description: '탑 가드 ID', example: 1 })
-  topGuardId: number;
+  @ApiProperty({ type: Number, description: '탑 가드 ID', example: '1' })
+  topGuardRid: string;
 
   @ApiProperty({ type: String, description: '모드', example: 'short' })
   mode: 'short' | 'long';

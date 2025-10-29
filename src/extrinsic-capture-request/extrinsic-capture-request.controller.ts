@@ -36,17 +36,17 @@ export class ExtrinsicCaptureRequestController {
     ),
   )
   async remoteCaptureZip(@Body() body: ExtrinsicCaptureRequestInput) {
-    const { topGuardBaseUrl, mode, topGuardId } = body;
+    const { topGuardBaseUrl, mode, topGuardRid } = body;
 
     const extrinsicCaptureRequest =
       await this.exCapReqSvc.createExtrinsicCaptureRequest({
-        topGuardId,
+        topGuardRid,
         mode,
       });
 
     void this.exCapReqSvc.captureAndSaveToDisk({
       topGuardBaseUrl,
-      topGuardId,
+      topGuardRid,
       extrinsicCaptureRequestId: extrinsicCaptureRequest.id,
       mode,
     });
@@ -72,12 +72,12 @@ export class ExtrinsicCaptureRequestController {
     };
   }
 
-  @Get('latest/:topGuardId')
+  @Get('latest/:topGuardRid')
   async getLatestExtrinsicCaptureRequest(
-    @Param('topGuardId') topGuardId: string,
+    @Param('topGuardRid') topGuardRid: string,
   ) {
     const extrinsicCaptureRequest =
-      await this.exCapReqSvc.getLatestExtrinsicCaptureRequest(+topGuardId);
+      await this.exCapReqSvc.getLatestExtrinsicCaptureRequest(topGuardRid);
     return {
       data: extrinsicCaptureRequest,
     };

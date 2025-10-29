@@ -1,18 +1,17 @@
 import {
   pgTable,
   varchar,
-  serial,
-  integer,
   pgEnum,
   timestamp,
   text,
-  uuid,
+  index,
+  uniqueIndex,
+  integer,
 } from 'drizzle-orm/pg-core';
 import { projects } from './project';
 
 // 향후 수정 필요
 export const StageEnum = pgEnum('stage', [
-  'none',
   'created', // 최초 생성(= none 대체)
   'captured', // 캡처 완료
   'submitted', // (선택 완료 후) AI로 전송됨
@@ -34,19 +33,32 @@ export const RequestKindEnum = pgEnum('request_kind', [
   'extrinsic_request',
 ]);
 
-export const topGuards = pgTable('top_guards', {
-  id: serial('id').primaryKey(),
-  // uuid: uuid('uuid').defaultRandom(),
-  projectId: integer('project_id').references(() => projects.id, {
-    onDelete: 'cascade',
+export const topGuards = pgTable(
+  'top_guards',
+  {
+    rid: text('rid').primaryKey(),
+    projectRid: text('project_rid')
+      .notNull()
+      .references(() => projects.rid, {
+        onDelete: 'cascade',
+      }),
+    name: varchar('name', { length: 255 }),
+    nameVer: integer('name_ver').notNull().default(0),
+    mac: varchar('mac', { length: 17 }),
+    webRtcUrl: text('web_rtc_url'),
+    intrinsicStage: StageEnum('intrinsic_stage').default('created'),
+    intrinsicStageVer: integer('intrinsic_stage_ver').notNull().default(0),
+    extrinsicStage: StageEnum('extrinsic_stage').default('created'),
+    extrinsicStageVer: integer('extrinsic_stage_ver').notNull().default(0),
+    // failureStage: RequestKindEnum('failure_stage').default('none'),
+    createdBy: integer('created_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'string' }).notNull(), // ISO
+  },
+  (t) => ({
+    idxProjectRid: index('ix_top_guards_project_rid').on(t.projectRid),
+    idxUpdatedAt: index('ix_top_guards_updated_at').on(t.updatedAt),
+    uqRid: uniqueIndex('uq_top_guards_rid').on(t.rid),
   }),
-  name: varchar('name', { length: 255 }),
-  mac: varchar('mac', { length: 17 }).unique(),
-  webRtcUrl: text('web_rtc_url'),
-  intrinsicStage: StageEnum('intrinsic_stage').default('created'),
-  extrinsicStage: StageEnum('extrinsic_stage').default('created'),
-  failureStage: RequestKindEnum('failure_stage').default('none'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-});
+);
 // 향후 실패 단계 요청 ID 추가 필요

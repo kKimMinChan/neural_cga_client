@@ -1,40 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
-import { TokenStoreService } from 'src/token-store/token-store.service';
-import { LoginInput } from './auth.schema';
-import { UserRepository } from 'src/user/user.repository';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
+import { loginLogoutInput } from './auth.schema';
+import { loginLogs } from 'src/db/schema/loginLog';
+import { db } from 'src/db/db';
+import { desc } from 'drizzle-orm';
+import { ErrorHelper } from 'src/common/ErrorHelper';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly tokenStore: TokenStoreService,
-    private readonly userRepo: UserRepository,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor() {}
 
-  // async validateUser(login: LoginInput): Promise<any> {
-  //   const user = await this.userRepo.findUserByEmail(login.email);
-  //   if (user && (await bcrypt.compare(login.password, user.password))) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // }
+  async loginLog(loginInput: loginLogoutInput) {
+    try {
+      const loginLog = await db.insert(loginLogs).values(loginInput);
+      return loginLog;
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
 
-  async login(user: any) {
-    const payload = { id: user.id, role: user.role, name: user.name };
-    const token = this.jwtService.sign(payload);
-
-    return {
-      accessToken: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
-      },
-    };
+  async latestLoginLog() {
+    const latestLoginLog = await db
+      .select()
+      .from(loginLogs)
+      .orderBy(desc(loginLogs.createdAt))
+      .limit(1);
+    return latestLoginLog;
   }
 }

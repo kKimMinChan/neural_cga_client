@@ -64,15 +64,15 @@ export class ExtrinsicCaptureRequestService {
    */
   async captureAndSaveToDisk(params: {
     topGuardBaseUrl: string;
-    topGuardId: number;
+    topGuardRid: string;
     extrinsicCaptureRequestId: number;
     mode: 'short' | 'long';
   }) {
     try {
-      const { topGuardBaseUrl, mode, topGuardId, extrinsicCaptureRequestId } =
+      const { topGuardBaseUrl, mode, topGuardRid, extrinsicCaptureRequestId } =
         params;
 
-      const folder = `top_guard_list/${topGuardId}/extrinsic_capture_pairs`;
+      const folder = `top_guard_list/${topGuardRid}/extrinsic_capture_pairs`;
       const base = this.getTopGuardBase(topGuardBaseUrl);
 
       console.log(base, 'base', 'folder', folder);
@@ -198,9 +198,9 @@ export class ExtrinsicCaptureRequestService {
     );
   }
 
-  async getLatestExtrinsicCaptureRequest(topGuardId: number) {
+  async getLatestExtrinsicCaptureRequest(topGuardRid: string) {
     return this.extrinsicCaptureRequestRepository.getLatestExtrinsicCaptureRequest(
-      topGuardId,
+      topGuardRid,
     );
   }
 }

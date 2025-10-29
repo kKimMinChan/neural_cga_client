@@ -17,9 +17,11 @@ export const extrinsicModeEnum = pgEnum('extrinsic_mode', ['short', 'long']);
 
 export const extrinsicCaptureRequests = pgTable('extrinsic_capture_requests', {
   id: serial('id').primaryKey(),
-  topGuardId: integer('top_guard_id').references(() => topGuards.id, {
-    onDelete: 'cascade',
-  }),
+  topGuardRid: text('top_guard_rid')
+    .notNull()
+    .references(() => topGuards.rid, {
+      onDelete: 'cascade',
+    }),
   mode: extrinsicModeEnum('extrinsic_mode'),
   status: extrinsicCaptureRequestStatusEnum(
     'extrinsic_capture_request_status',

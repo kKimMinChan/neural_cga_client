@@ -62,7 +62,7 @@ export class ProjectController {
     };
   }
 
-  @Get(':id')
+  @Get(':rid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
       BaseProjectDto,
@@ -71,14 +71,14 @@ export class ProjectController {
       true,
     ),
   )
-  async findOne(@Param('id') id: string) {
-    const project = await this.projectService.findOne(+id);
+  async findOne(@Param('rid') rid: string) {
+    const project = await this.projectService.findOne(rid);
     return {
       data: project,
     };
   }
 
-  @Patch(':id')
+  @Patch(':rid')
   @ApiBody({ type: CreateProjectDto })
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
@@ -88,19 +88,19 @@ export class ProjectController {
       true,
     ),
   )
-  async update(@Param('id') id: string, @Body() body: CreateProjectInput) {
-    const updated = await this.projectService.update(+id, body);
+  async update(@Param('rid') rid: string, @Body() body: CreateProjectInput) {
+    const updated = await this.projectService.update(rid, body);
     return {
       data: updated,
     };
   }
 
-  @Delete(':id')
+  @Delete(':rid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(null, '프로젝트 삭제', false, false),
   )
-  async remove(@Param('id') id: string) {
-    await this.projectService.remove(+id);
+  async remove(@Param('rid') rid: string) {
+    await this.projectService.remove(rid);
     return {
       translate: '성공적으로 삭제 되었습니다.',
     };

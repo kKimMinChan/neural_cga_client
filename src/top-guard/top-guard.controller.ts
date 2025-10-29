@@ -47,7 +47,7 @@ export class TopGuardController {
     };
   }
 
-  @Get('projects/:projectId')
+  @Get('projects/:projectRid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
       BaseTopGuardDto,
@@ -56,14 +56,14 @@ export class TopGuardController {
       true,
     ),
   )
-  async findAll(@Param('projectId') projectId: number) {
-    const topGuards = await this.topGuardService.findAll(projectId);
+  async findAll(@Param('projectRid') projectRid: string) {
+    const topGuards = await this.topGuardService.findAll(projectRid);
     return {
       data: topGuards,
     };
   }
 
-  @Get(':id')
+  @Get(':rid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
       BaseTopGuardDto,
@@ -72,8 +72,8 @@ export class TopGuardController {
       true,
     ),
   )
-  async findOne(@Param('id') id: number) {
-    const topGuard = await this.topGuardService.findOne(id);
+  async findOne(@Param('rid') rid: string) {
+    const topGuard = await this.topGuardService.findTopGuardByRid(rid);
     return {
       data: topGuard,
     };
@@ -90,12 +90,12 @@ export class TopGuardController {
     };
   }
 
-  @Delete(':id')
+  @Delete(':rid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(null, '탑가드 삭제', false, false),
   )
-  async remove(@Param('id') id: number) {
-    await this.topGuardService.remove(+id);
+  async remove(@Param('rid') rid: string) {
+    await this.topGuardService.remove(rid);
     return {
       translate: '성공적으로 삭제 되었습니다.',
     };

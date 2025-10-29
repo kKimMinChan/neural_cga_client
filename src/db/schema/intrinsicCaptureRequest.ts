@@ -18,9 +18,11 @@ export const captureRequestStatusEnum = pgEnum('capture_request_status', [
 
 export const captureRequests = pgTable('capture_requests', {
   id: serial('id').primaryKey(),
-  topGuardId: integer('top_guard_id').references(() => topGuards.id, {
-    onDelete: 'cascade',
-  }),
+  topGuardRid: text('top_guard_rid')
+    .notNull()
+    .references(() => topGuards.rid, {
+      onDelete: 'cascade',
+    }),
   count: integer('count'),
   status: captureRequestStatusEnum('capture_request_status').default(
     'requested',

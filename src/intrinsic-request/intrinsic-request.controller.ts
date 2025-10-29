@@ -40,12 +40,12 @@ export class IntrinsicRequestController {
     const result = await this.intrinsicRequestService.createSelectionImages(
       intrinsicRequest.id,
       body.intrinsicCaptureIds,
-      +body.topGuardId,
+      body.topGuardRid,
     );
 
     void this.intrinsicRequestService.sendToAI(
       result,
-      +body.topGuardId,
+      body.topGuardRid,
       intrinsicRequest.id,
       body.boardCols,
       body.boardRows,
@@ -55,20 +55,22 @@ export class IntrinsicRequestController {
     return { data: intrinsicRequest };
   }
 
-  @Get('latest/:topGuardId') // 탑가드 아이디로 최신 요청 조회
-  async findTopGuardIdLatestRequest(@Param('topGuardId') topGuardId: string) {
+  @Get('latest/:topGuardRid') // 탑가드 RID로 최신 요청 조회
+  async findTopGuardIdLatestRequest(@Param('topGuardRid') topGuardRid: string) {
     const result =
       await this.intrinsicRequestService.findTopGuardIdLatestRequest(
-        +topGuardId,
+        topGuardRid,
       );
     return { data: result };
   }
 
-  @Get('failed-all/:topGuardId') // 탑가드 아이디에 해당하는 실패한 요청 모두 조회
-  async findTopGuardIdFailedRequests(@Param('topGuardId') topGuardId: string) {
+  @Get('failed-all/:topGuardRid') // 탑가드 아이디에 해당하는 실패한 요청 모두 조회
+  async findTopGuardIdFailedRequests(
+    @Param('topGuardRid') topGuardRid: string,
+  ) {
     const result =
       await this.intrinsicRequestService.findTopGuardIdFailedRequests(
-        +topGuardId,
+        topGuardRid,
       );
     return { data: result };
   }

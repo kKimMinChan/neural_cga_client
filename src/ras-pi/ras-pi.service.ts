@@ -242,12 +242,12 @@ export class RasPiService {
     return results;
   }
 
-  async getTopGuardMac(mac: string, topGuardId: string) {
+  async getTopGuardMac(mac: string, topGuardRid: string) {
     const topGuards = await this.getAllRasPiInfoViaSSH();
     const topGuard = topGuards.find((topGuard) => topGuard.mac === mac);
     if (topGuard && topGuard?.webRtcUrl) {
       return await this.topGuardService.update({
-        id: +topGuardId,
+        rid: topGuardRid,
         webRtcUrl: topGuard.webRtcUrl,
       });
     }

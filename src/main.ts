@@ -73,22 +73,22 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   // BullMQ 큐 인스턴스 가져오기
-  const userQueue = app.get<Queue>(getQueueToken('userQueue'));
+  // const userQueue = app.get<Queue>(getQueueToken('userQueue'));
 
   // Bull Board 설정
-  const serverAdapter = new ExpressAdapter();
-  serverAdapter.setBasePath('/admin/queues');
+  // const serverAdapter = new ExpressAdapter();
+  // serverAdapter.setBasePath('/admin/queues');
 
-  const { setQueues } = createBullBoard({
-    queues: [],
-    serverAdapter,
-  });
+  // const { setQueues } = createBullBoard({
+  //   queues: [],
+  //   serverAdapter,
+  // });
 
-  setQueues([new BullAdapter(userQueue)]);
+  // setQueues([new BullAdapter(userQueue)]);
 
   // Express에 bull-board router 연결
   const bullApp = express();
-  bullApp.use('/admin/queues', serverAdapter.getRouter());
+  // bullApp.use('/admin/queues', serverAdapter.getRouter());
   app.use(bullApp);
 
   await app.listen(4002);

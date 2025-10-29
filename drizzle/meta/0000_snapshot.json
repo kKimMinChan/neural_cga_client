@@ -1,0 +1,1128 @@
+{
+  "id": "6659284c-7143-40d5-980d-fd0d2cb11851",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.projects": {
+      "name": "projects",
+      "schema": "",
+      "columns": {
+        "rid": {
+          "name": "rid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name_ver": {
+          "name": "name_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "topGuardCount": {
+          "name": "topGuardCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ix_projects_updated_at": {
+          "name": "ix_projects_updated_at",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "uq_projects_rid": {
+          "name": "uq_projects_rid",
+          "columns": [
+            {
+              "expression": "rid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "projects_name_unique": {
+          "name": "projects_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.extrinsic_captures": {
+      "name": "extrinsic_captures",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "extrinsic_capture_request_id": {
+          "name": "extrinsic_capture_request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bmp_name": {
+          "name": "bmp_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pcd_name": {
+          "name": "pcd_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "extrinsic_captures_extrinsic_capture_request_id_extrinsic_capture_requests_id_fk": {
+          "name": "extrinsic_captures_extrinsic_capture_request_id_extrinsic_capture_requests_id_fk",
+          "tableFrom": "extrinsic_captures",
+          "tableTo": "extrinsic_capture_requests",
+          "columnsFrom": [
+            "extrinsic_capture_request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.extrinsic_selections": {
+      "name": "extrinsic_selections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "top_guard_rid": {
+          "name": "top_guard_rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bmp_path": {
+          "name": "bmp_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pcd_path": {
+          "name": "pcd_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "extrinsic_selections_top_guard_rid_top_guards_rid_fk": {
+          "name": "extrinsic_selections_top_guard_rid_top_guards_rid_fk",
+          "tableFrom": "extrinsic_selections",
+          "tableTo": "top_guards",
+          "columnsFrom": [
+            "top_guard_rid"
+          ],
+          "columnsTo": [
+            "rid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.intrinsic_outputs": {
+      "name": "intrinsic_outputs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "intrinsic_request_id": {
+          "name": "intrinsic_request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "camera_matrix": {
+          "name": "camera_matrix",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dist_coeffs": {
+          "name": "dist_coeffs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "per_image_reprojection_error": {
+          "name": "per_image_reprojection_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "used_image_count": {
+          "name": "used_image_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mean_reprojection_error": {
+          "name": "mean_reprojection_error",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_final": {
+          "name": "is_final",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "intrinsic_outputs_intrinsic_request_id_intrinsic_requests_id_fk": {
+          "name": "intrinsic_outputs_intrinsic_request_id_intrinsic_requests_id_fk",
+          "tableFrom": "intrinsic_outputs",
+          "tableTo": "intrinsic_requests",
+          "columnsFrom": [
+            "intrinsic_request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.extrinsic_results": {
+      "name": "extrinsic_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "top_guard_rid": {
+          "name": "top_guard_rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "params": {
+          "name": "params",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_final": {
+          "name": "is_final",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "extrinsic_results_top_guard_rid_top_guards_rid_fk": {
+          "name": "extrinsic_results_top_guard_rid_top_guards_rid_fk",
+          "tableFrom": "extrinsic_results",
+          "tableTo": "top_guards",
+          "columnsFrom": [
+            "top_guard_rid"
+          ],
+          "columnsTo": [
+            "rid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.top_guards": {
+      "name": "top_guards",
+      "schema": "",
+      "columns": {
+        "rid": {
+          "name": "rid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_rid": {
+          "name": "project_rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name_ver": {
+          "name": "name_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "mac": {
+          "name": "mac",
+          "type": "varchar(17)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mac_ver": {
+          "name": "mac_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "web_rtc_url": {
+          "name": "web_rtc_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "web_rtc_url_ver": {
+          "name": "web_rtc_url_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "intrinsic_stage": {
+          "name": "intrinsic_stage",
+          "type": "stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'created'"
+        },
+        "intrinsic_stage_ver": {
+          "name": "intrinsic_stage_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "extrinsic_stage": {
+          "name": "extrinsic_stage",
+          "type": "stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'created'"
+        },
+        "extrinsic_stage_ver": {
+          "name": "extrinsic_stage_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "failure_stage": {
+          "name": "failure_stage",
+          "type": "request_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'none'"
+        },
+        "failure_stage_ver": {
+          "name": "failure_stage_ver",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ix_top_guards_project_rid": {
+          "name": "ix_top_guards_project_rid",
+          "columns": [
+            {
+              "expression": "project_rid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_top_guards_updated_at": {
+          "name": "ix_top_guards_updated_at",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "uq_top_guards_rid": {
+          "name": "uq_top_guards_rid",
+          "columns": [
+            {
+              "expression": "rid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "top_guards_project_rid_projects_rid_fk": {
+          "name": "top_guards_project_rid_projects_rid_fk",
+          "tableFrom": "top_guards",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_rid"
+          ],
+          "columnsTo": [
+            "rid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.intrinsic_captures": {
+      "name": "intrinsic_captures",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "capture_request_id": {
+          "name": "capture_request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "intrinsic_captures_capture_request_id_capture_requests_id_fk": {
+          "name": "intrinsic_captures_capture_request_id_capture_requests_id_fk",
+          "tableFrom": "intrinsic_captures",
+          "tableTo": "capture_requests",
+          "columnsFrom": [
+            "capture_request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.capture_requests": {
+      "name": "capture_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "top_guard_rid": {
+          "name": "top_guard_rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capture_request_status": {
+          "name": "capture_request_status",
+          "type": "capture_request_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'requested'"
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "capture_requests_top_guard_rid_top_guards_rid_fk": {
+          "name": "capture_requests_top_guard_rid_top_guards_rid_fk",
+          "tableFrom": "capture_requests",
+          "tableTo": "top_guards",
+          "columnsFrom": [
+            "top_guard_rid"
+          ],
+          "columnsTo": [
+            "rid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.intrinsic_requests": {
+      "name": "intrinsic_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "top_guard_rid": {
+          "name": "top_guard_rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "intrinsic_request_status": {
+          "name": "intrinsic_request_status",
+          "type": "intrinsic_request_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'requested'"
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "intrinsic_requests_top_guard_rid_top_guards_rid_fk": {
+          "name": "intrinsic_requests_top_guard_rid_top_guards_rid_fk",
+          "tableFrom": "intrinsic_requests",
+          "tableTo": "top_guards",
+          "columnsFrom": [
+            "top_guard_rid"
+          ],
+          "columnsTo": [
+            "rid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.intrinsic_selections": {
+      "name": "intrinsic_selections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "intrinsic_request_id": {
+          "name": "intrinsic_request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "intrinsic_capture_id": {
+          "name": "intrinsic_capture_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "intrinsic_selections_intrinsic_request_id_intrinsic_requests_id_fk": {
+          "name": "intrinsic_selections_intrinsic_request_id_intrinsic_requests_id_fk",
+          "tableFrom": "intrinsic_selections",
+          "tableTo": "intrinsic_requests",
+          "columnsFrom": [
+            "intrinsic_request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "intrinsic_selections_intrinsic_capture_id_intrinsic_captures_id_fk": {
+          "name": "intrinsic_selections_intrinsic_capture_id_intrinsic_captures_id_fk",
+          "tableFrom": "intrinsic_selections",
+          "tableTo": "intrinsic_captures",
+          "columnsFrom": [
+            "intrinsic_capture_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.intrinsic_overlays": {
+      "name": "intrinsic_overlays",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "intrinsic_selection_id": {
+          "name": "intrinsic_selection_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "intrinsic_overlays_intrinsic_selection_id_intrinsic_selections_id_fk": {
+          "name": "intrinsic_overlays_intrinsic_selection_id_intrinsic_selections_id_fk",
+          "tableFrom": "intrinsic_overlays",
+          "tableTo": "intrinsic_selections",
+          "columnsFrom": [
+            "intrinsic_selection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.extrinsic_capture_requests": {
+      "name": "extrinsic_capture_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "top_guard_rid": {
+          "name": "top_guard_rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "extrinsic_mode": {
+          "name": "extrinsic_mode",
+          "type": "extrinsic_mode",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "extrinsic_capture_request_status": {
+          "name": "extrinsic_capture_request_status",
+          "type": "extrinsic_capture_request_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'requested'"
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "extrinsic_capture_requests_top_guard_rid_top_guards_rid_fk": {
+          "name": "extrinsic_capture_requests_top_guard_rid_top_guards_rid_fk",
+          "tableFrom": "extrinsic_capture_requests",
+          "tableTo": "top_guards",
+          "columnsFrom": [
+            "top_guard_rid"
+          ],
+          "columnsTo": [
+            "rid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.outboxes": {
+      "name": "outboxes",
+      "schema": "",
+      "columns": {
+        "op_id": {
+          "name": "op_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "entity": {
+          "name": "entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rid": {
+          "name": "rid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "patch": {
+          "name": "patch",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "outbox_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "retry_count": {
+          "name": "retry_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.login_logs": {
+      "name": "login_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.request_kind": {
+      "name": "request_kind",
+      "schema": "public",
+      "values": [
+        "none",
+        "capture_request",
+        "intrinsic_request",
+        "extrinsic_capture",
+        "extrinsic_request"
+      ]
+    },
+    "public.stage": {
+      "name": "stage",
+      "schema": "public",
+      "values": [
+        "none",
+        "created",
+        "captured",
+        "submitted",
+        "result_received",
+        "finalized"
+      ]
+    },
+    "public.sync_status": {
+      "name": "sync_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "synced",
+        "failed"
+      ]
+    },
+    "public.capture_request_status": {
+      "name": "capture_request_status",
+      "schema": "public",
+      "values": [
+        "requested",
+        "processing",
+        "completed",
+        "skipped",
+        "failed"
+      ]
+    },
+    "public.intrinsic_request_status": {
+      "name": "intrinsic_request_status",
+      "schema": "public",
+      "values": [
+        "requested",
+        "processing",
+        "completed",
+        "failed",
+        "skipped"
+      ]
+    },
+    "public.extrinsic_capture_request_status": {
+      "name": "extrinsic_capture_request_status",
+      "schema": "public",
+      "values": [
+        "requested",
+        "processing",
+        "completed",
+        "failed",
+        "skipped"
+      ]
+    },
+    "public.extrinsic_mode": {
+      "name": "extrinsic_mode",
+      "schema": "public",
+      "values": [
+        "short",
+        "long"
+      ]
+    },
+    "public.outbox_status": {
+      "name": "outbox_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "done",
+        "failed"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

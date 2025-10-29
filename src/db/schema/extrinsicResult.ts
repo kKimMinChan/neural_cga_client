@@ -10,9 +10,11 @@ import { topGuards } from './topGuard';
 
 export const extrinsicResults = pgTable('extrinsic_results', {
   id: serial('id').primaryKey(),
-  topGuardId: integer('top_guard_id').references(() => topGuards.id, {
-    onDelete: 'cascade',
-  }),
+  topGuardRid: text('top_guard_rid')
+    .notNull()
+    .references(() => topGuards.rid, {
+      onDelete: 'cascade',
+    }),
   params: text('params'),
   isFinal: boolean('is_final').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),

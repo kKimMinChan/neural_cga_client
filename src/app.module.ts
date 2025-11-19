@@ -17,6 +17,7 @@ import { ExtrinsicCaptureRequestModule } from './extrinsic-capture-request/extri
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { SyncModule } from './sync/sync.module';
+import { UploadCalibrationModule } from './upload-calibration/upload-calibration.module';
 @Module({
   imports: [
     NetworkMonitorModule,
@@ -33,6 +34,7 @@ import { SyncModule } from './sync/sync.module';
     ExtrinsicCapturePairModule,
     ExtrinsicCaptureRequestModule,
     SyncModule,
+    UploadCalibrationModule,
   ],
   controllers: [AppController],
   providers: [

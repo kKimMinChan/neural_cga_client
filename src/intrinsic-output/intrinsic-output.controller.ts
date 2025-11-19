@@ -13,6 +13,7 @@ import { ApiBody, ApiExtraModels, ApiResponse } from '@nestjs/swagger';
 import {
   IntrinsicOutputIsFinalInput,
   IntrinsicOutputIsFinalRequestDto,
+  IntrinsicOutputIsFinalSchema,
   IntrinsicOutputWithPairsSchema,
   IntrinsicOutputWithoutPairsSchema,
 } from './intrinsic-output.schema';
@@ -52,7 +53,10 @@ export class IntrinsicOutputController {
   @Post('is-final')
   @ApiBody({ type: IntrinsicOutputIsFinalRequestDto })
   @ZodResponse({ type: NoContentDtoWithoutPairs as any })
-  async isFinal(@Body() body: IntrinsicOutputIsFinalInput) {
+  async isFinal(
+    @Body(new ZodValidationPipe(IntrinsicOutputIsFinalSchema))
+    body: IntrinsicOutputIsFinalInput,
+  ) {
     const result = await this.intrinsicOutputService.isFinal(body);
     return { data: result };
   }
@@ -71,7 +75,7 @@ export class IntrinsicOutputController {
     };
   }
 
-  @Delete(':intrinsicOutputId')
+  @Delete(':intrinsicOutputRid')
   @ApiResponse(
     SwaggerHelper.getApiResponseSchema(
       null,
@@ -80,8 +84,8 @@ export class IntrinsicOutputController {
       false,
     ),
   )
-  async remove(@Param('intrinsicOutputId') intrinsicOutputId: string) {
-    await this.intrinsicOutputService.deleteIntrinsicOutput(+intrinsicOutputId);
+  async remove(@Param('intrinsicOutputRid') intrinsicOutputRid: string) {
+    await this.intrinsicOutputService.deleteIntrinsicOutput(intrinsicOutputRid);
     return {
       translate: '성공적으로 삭제 되었습니다.',
     };

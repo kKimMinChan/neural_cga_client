@@ -4,9 +4,13 @@ import {
   LoginLogoutDto,
   loginLogoutInput,
   loginLogoutSchema,
+  LoginInput,
+  LoginSchema,
+  LoginDto,
 } from './auth.schema';
 import { ZodValidationPipe } from 'src/common/zod-validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
+import { AxiosResponse } from 'axios';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +23,17 @@ export class AuthController {
     loginInput: loginLogoutInput,
   ) {
     return this.authService.loginLog(loginInput);
+  }
+
+  @Post('login')
+  @ApiBody({ type: LoginDto })
+  async login(
+    @Body(new ZodValidationPipe(LoginSchema))
+    loginInput: LoginInput,
+  ) {
+    return {
+      data: await this.authService.login(loginInput),
+    };
   }
 
   @Get('latest-login-log')

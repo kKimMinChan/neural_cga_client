@@ -120,10 +120,11 @@ export class CaptureRequestService {
 
       for (const file of newFiles) {
         // const imagePath = path.join(folder, path.basename(file));
-        const imagePath = path.basename(file);
+        const fileName = path.basename(file);
         await this.intrinsicCaptureService.create({
           captureRequestId,
-          fileName: imagePath,
+          fileName,
+          filePath: `${topGuardRid}/capture_images`,
         });
       }
 

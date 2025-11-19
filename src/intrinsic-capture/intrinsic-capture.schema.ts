@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const CreateIntrinsicCaptureSchema = z.object({
   captureRequestId: z.number().int().positive(),
   fileName: z.string(),
+  filePath: z.string(),
 });
 
 export type CreateIntrinsicCaptureInput = z.infer<

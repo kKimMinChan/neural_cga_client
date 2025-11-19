@@ -17,6 +17,8 @@ export const intrinsicCaptures = pgTable('intrinsic_captures', {
       onDelete: 'cascade',
     })
     .notNull(),
-  fileName: text('file_name'),
+  fileName: text('file_name').notNull(),
+  filePath: text('file_path').notNull(),
+  isDeleted: boolean('is_deleted').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });

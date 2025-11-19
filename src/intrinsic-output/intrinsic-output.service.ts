@@ -3,6 +3,8 @@ import {
   Inject,
   forwardRef,
   NotFoundException,
+  ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { IntrinsicOutputRepository } from './intrinsic-output.repository';
 import {
@@ -11,6 +13,10 @@ import {
   IntrinsicOutputWithPairsDto,
   IntrinsicOutputWithoutPairsDto,
   IntrinsicOverlayInput,
+  IntrinsicManifestInput,
+  IntrinsicManifestKind,
+  IntrinsicManifestFormat,
+  IntrinsicValueInput,
 } from './intrinsic-output.schema';
 import { ErrorHelper } from 'src/common/ErrorHelper';
 import { IntrinsicRequestService } from 'src/intrinsic-request/intrinsic-request.service';
@@ -19,6 +25,8 @@ import { toIso } from 'src/common/datetime';
 import { StageEnum } from 'src/top-guard/top-guard.schema';
 import { TopGuardService } from 'src/top-guard/top-guard.service';
 import { sendYaml } from 'src/common/sendYaml';
+import { ulid } from 'ulid';
+import { OutboxStatus } from 'src/sync/sync.schema';
 
 @Injectable()
 export class IntrinsicOutputService {
@@ -115,13 +123,67 @@ export class IntrinsicOutputService {
 
     if (!exists) throw new NotFoundException('Intrinsic request not found');
 
-    const result = await this.intrinsicOutputRepository.isFinal(body);
+    const existOutbox =
+      await this.intrinsicOutputRepository.findOutboxByEntityAndRid(
+        'intrinsic_capture',
+        body.topGuardRid,
+      );
 
-    if (result) {
-      await this.topGuardService.updateIntrinsicStage({
+    if (existOutbox) {
+      throw new ConflictException(
+        'Intrinsic capture and value outbox already exists',
+      );
+    }
+
+    const result = await this.intrinsicOutputRepository.isFinal(body);
+    if (result.cameraMatrix && result.distCoeffs) {
+      const topGuard = await this.topGuardService.updateIntrinsicStage({
         topGuardRid: body.topGuardRid,
         intrinsicStage: StageEnum.Finalized,
       });
+      // if (topGuard) {
+      //   const selections =
+      //     await this.intrinsicRequestService.findIntrinsicSelections(
+      //       body.intrinsicRequestId,
+      //     );
+      //   const manifest: IntrinsicManifestInput = await Promise.all(
+      //     selections.map(async (selection) => {
+      //       const capture =
+      //         await this.intrinsicRequestService.findIntrinsicCapture(
+      //           selection.intrinsicCaptureId,
+      //         );
+      //       if (!capture) {
+      //         throw new NotFoundException('Intrinsic capture not found');
+      //       }
+      //       return {
+      //         name: capture.fileName,
+      //         kind: IntrinsicManifestKind.Image,
+      //         format: IntrinsicManifestFormat.BMP,
+      //       };
+      //     }),
+      //   );
+      //   const intrinsicValue: IntrinsicValueInput = {
+      //     cameraMatrix: JSON.parse(result.cameraMatrix),
+      //     distCoeffs: JSON.parse(result.distCoeffs),
+      //   };
+      //   const patch = {
+      //     manifest,
+      //     intrinsicValue,
+      //   };
+
+      //   await this.intrinsicOutputRepository.createOutbox({
+      //     opId: ulid(),
+      //     entity: 'intrinsic',
+      //     rid: body.topGuardRid,
+      //     patch: JSON.stringify(patch),
+      //     preconds: JSON.stringify({}),
+      //     updatedAt: new Date().toISOString(),
+      //     status: OutboxStatus.Pending,
+      //     retryCount: 0,
+      //   });
+      // }
+    } else {
+      throw new BadRequestException('intrinsicRequestId is not valid');
     }
     return result;
   }
@@ -131,7 +193,7 @@ export class IntrinsicOutputService {
     return result;
   }
 
-  deleteIntrinsicOutput(id: number) {
-    return this.intrinsicOutputRepository.deleteIntrinsicOutput(id);
+  deleteIntrinsicOutput(rid: string) {
+    return this.intrinsicOutputRepository.deleteIntrinsicOutput(rid);
   }
 }

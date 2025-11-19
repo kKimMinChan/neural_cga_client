@@ -10,6 +10,7 @@ import { eq, sql, gt, and } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { Outbox } from 'src/sync/sync.schema';
 import { mergePatch, mergePreconds } from 'src/common/mergeOutbox';
+import { DbClient } from 'src/db/db-client.type';
 
 @Injectable()
 export class TopGuardRepository {
@@ -55,7 +56,7 @@ export class TopGuardRepository {
         .values({
           opId: ulid(),
           entity: 'topGuard',
-          dmlType: 'insert',
+          // dmlType: 'insert',
           rid: row.rid,
           patch: JSON.stringify(patch),
           preconds: JSON.stringify(preconds),
@@ -76,9 +77,11 @@ export class TopGuardRepository {
       intrinsicStage?: StageEnum;
     };
 
+    console.log('data', data);
+
     const patch: Record<string, unknown> = {};
     if (typeof name !== 'undefined') patch.name = name;
-    if (typeof webRtcUrl !== 'undefined') patch.webRtcUrl = webRtcUrl;
+    // if (typeof webRtcUrl !== 'undefined') patch.webRtcUrl = webRtcUrl;
     if (typeof intrinsicStage !== 'undefined')
       patch.intrinsicStage = intrinsicStage;
 
@@ -100,8 +103,8 @@ export class TopGuardRepository {
       //   }
       // });
 
-      if (typeof webRtcUrl !== 'undefined')
-        return { topGuard: updatedTopGuard };
+      // if (typeof webRtcUrl !== 'undefined')
+      //   return { topGuard: updatedTopGuard };
       // payload.nameVer = updatedTopGuard.nameVer;
       // payload.intrinsicStageVer = updatedTopGuard.intrinsicStageVer;
       // payload.extrinsicStageVer = updatedTopGuard.extrinsicStageVer;
@@ -125,6 +128,8 @@ export class TopGuardRepository {
             eq(outboxes.status, 'pending'),
           ),
         );
+
+      console.log('preOutbox', preOutbox);
 
       if (!preOutbox) {
         const [outbox] = await tx
@@ -172,17 +177,20 @@ export class TopGuardRepository {
     return result;
   }
 
-  async upsertTopGuard(row: {
-    rid: string;
-    projectRid: string;
-    name: string;
-    nameVer: number;
-    intrinsicStage: StageEnum;
-    intrinsicStageVer: number;
-    extrinsicStage: StageEnum;
-    extrinsicStageVer: number;
-  }) {
-    await db
+  async upsertTopGuard(
+    client: DbClient,
+    row: {
+      rid: string;
+      projectRid: string;
+      name: string;
+      nameVer: number;
+      intrinsicStage: StageEnum;
+      intrinsicStageVer: number;
+      extrinsicStage: StageEnum;
+      extrinsicStageVer: number;
+    },
+  ) {
+    await client
       .insert(topGuards)
       .values({ ...row, updatedAt: new Date().toISOString() })
       .onConflictDoUpdate({

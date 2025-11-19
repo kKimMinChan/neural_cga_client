@@ -30,7 +30,8 @@ export class IntrinsicRequestRepository {
     return await db
       .select()
       .from(intrinsicRequests)
-      .where(eq(intrinsicRequests.id, id));
+      .where(eq(intrinsicRequests.id, id))
+      .then((res) => res[0]);
   }
 
   async createIntrinsicSelections(data: CreateIntrinsicSelectionsInput) {

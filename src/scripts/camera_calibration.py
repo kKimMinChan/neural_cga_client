@@ -7,7 +7,7 @@ import json
 import argparse
 
 # 체커보드 내부 코너 기본값 (가로, 세로)
-DEFAULT_CHECKERBOARD = (27, 19)
+DEFAULT_CHECKERBOARD = (11, 8)
 SQUARE_SIZE_X = 34  # mm
 SQUARE_SIZE_Y = 33  # mm
 

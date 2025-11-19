@@ -6,6 +6,7 @@ export const ExtrinsicCaptureRequestInput = z.object({
   topGuardRid: z.string(),
   topGuardBaseUrl: z.string().default('default'),
   mode: z.enum(['short', 'long']),
+  warmup_ms: z.number().optional(),
 });
 
 export type ExtrinsicCaptureRequestInput = z.infer<

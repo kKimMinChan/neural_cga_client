@@ -47,7 +47,16 @@ export class IntrinsicCaptureRepository {
 
   async deleteIntrinsicCapture(id: number) {
     return await db
-      .delete(intrinsicCaptures)
+      .update(intrinsicCaptures)
+      .set({ isDeleted: true })
       .where(eq(intrinsicCaptures.id, id));
+  }
+
+  async findOneCaptureRequestByCaptureId(captureId: number) {
+    return await db
+      .select()
+      .from(captureRequests)
+      .where(eq(captureRequests.id, captureId))
+      .then((res) => res[0]);
   }
 }

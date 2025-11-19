@@ -39,11 +39,11 @@ export class CaptureRequestToTopGuardDto {
   @ApiProperty({ type: Number, description: '캡처 요청 카운트' })
   count: number;
 
-  @ApiProperty({ type: String, description: '캡처 요청 스트림 경로' })
-  streamPath: string;
+  @ApiProperty({ type: String, description: '탑가드 Base URL' })
+  topGuardBaseUrl: string;
 
-  @ApiProperty({ type: String, description: '캡처 요청 IP' })
-  ip: string;
+  @ApiProperty({ type: Number, description: '캡처 요청 간격 (ms)' })
+  interval_ms: number;
 }
 
 export class CaptureRequestResponseDto {

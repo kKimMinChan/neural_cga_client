@@ -9,5 +9,6 @@ export const intrinsicOverlays = pgTable('intrinsic_overlays', {
     })
     .notNull(),
   fileName: text('file_name'),
+  filePath: text('file_path'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });

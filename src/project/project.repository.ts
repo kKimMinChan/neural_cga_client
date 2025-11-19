@@ -33,7 +33,7 @@ export class ProjectRepository {
           opId: ulid(),
           entity: 'project',
           rid: row.rid,
-          dmlType: 'insert',
+          // dmlType: 'insert',
           patch: JSON.stringify(patch),
           preconds: JSON.stringify(preconds),
           updatedAt: new Date().toISOString(),
@@ -97,7 +97,7 @@ export class ProjectRepository {
 
       const mergedpatch = mergePatch(JSON.parse(preOutbox.patch), patch);
       const mergedpreconds = mergePreconds(
-        JSON.parse(preOutbox.preconds),
+        JSON.parse(preOutbox.preconds ?? '{}'),
         preconds,
       );
       console.log('mergedpatch', mergedpatch);
@@ -127,21 +127,21 @@ export class ProjectRepository {
     companyId: number;
     createdBy: number;
   }) {
-    try {
-      return await db
-        .insert(projects)
-        .values({ ...row, updatedAt: new Date().toISOString() })
-        .onConflictDoUpdate({
-          target: [projects.rid],
-          set: {
-            name: sql`excluded.name`,
-            nameVer: sql`excluded.name_ver`,
-            updatedAt: sql`excluded.updated_at`,
-          },
-        });
-    } catch (error) {
-      console.log('error', error);
-    }
+    const project = await this.findOne(row.rid);
+    return await db
+      .insert(projects)
+      .values({ ...row, updatedAt: new Date().toISOString() })
+      .onConflictDoUpdate({
+        target: [projects.rid],
+        set: {
+          name: sql`excluded.name`,
+          nameVer: sql`excluded.name_ver`,
+          updatedAt: sql`excluded.updated_at`,
+          // ✅ 기존 값이 NULL일 때만 새 값 적용
+          companyId: sql`COALESCE(${project.companyId}, excluded.company_id)`,
+          createdBy: sql`COALESCE(${project.createdBy}, excluded.created_by)`,
+        },
+      });
   }
 
   async findAll(): Promise<Project[]> {

@@ -9,6 +9,8 @@ import {
 } from './top-guard.schema';
 import { ErrorHelper } from 'src/common/ErrorHelper';
 import { ulid } from 'ulid';
+import { db } from 'src/db/db';
+import { DbClient } from 'src/db/db-client.type';
 
 @Injectable()
 export class TopGuardService {
@@ -43,18 +45,21 @@ export class TopGuardService {
     }
   }
 
-  async upsert(body: {
-    rid: string;
-    projectRid: string;
-    name: string;
-    nameVer: number;
-    intrinsicStage: StageEnum;
-    intrinsicStageVer: number;
-    extrinsicStage: StageEnum;
-    extrinsicStageVer: number;
-  }) {
+  async upsert(
+    client: DbClient,
+    body: {
+      rid: string;
+      projectRid: string;
+      name: string;
+      nameVer: number;
+      intrinsicStage: StageEnum;
+      intrinsicStageVer: number;
+      extrinsicStage: StageEnum;
+      extrinsicStageVer: number;
+    },
+  ) {
     try {
-      return await this.topGuardRepository.upsertTopGuard(body);
+      return await this.topGuardRepository.upsertTopGuard(client, body);
     } catch (error) {
       ErrorHelper.handle(error);
     }

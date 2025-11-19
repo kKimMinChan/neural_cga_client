@@ -1,6 +1,7 @@
 import { appState } from 'src/db/schema';
 import { db } from 'src/db/db';
 import { eq } from 'drizzle-orm';
+import { Outbox } from './sync.schema';
 
 export class SyncRepository {
   async getLastSyncedAt() {

@@ -2,6 +2,39 @@ import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
+export enum IntrinsicManifestKind {
+  Image = 'IMAGE',
+  POINTCLOUD = 'POINTCLOUD',
+}
+
+export enum IntrinsicManifestFormat {
+  BMP = 'bmp',
+  PCD = 'pcd',
+}
+
+export const IntrinsicManifestItemSchema = z.object({
+  name: z.string(),
+  kind: z.nativeEnum(IntrinsicManifestKind),
+  format: z.nativeEnum(IntrinsicManifestFormat),
+});
+
+export type IntrinsicManifestItemInput = z.infer<
+  typeof IntrinsicManifestItemSchema
+>;
+export const IntrinsicManifestSchema = z.object({
+  files: z.array(IntrinsicManifestItemSchema),
+});
+
+export type IntrinsicManifestInput = z.infer<typeof IntrinsicManifestSchema>;
+
+export const IntrinsicValueSchema = z.object({
+  intrinsicOutputRid: z.string(),
+  cameraMatrix: z.array(z.array(z.number())),
+  distCoeffs: z.array(z.array(z.number())),
+});
+
+export type IntrinsicValueInput = z.infer<typeof IntrinsicValueSchema>;
+
 export const IntrinsicOverlaySchema = z.object({
   intrinsicSelectionId: z.number().int().positive(),
   fileName: z.string(),
@@ -31,6 +64,12 @@ export type IntrinsicOutputIsFinalInput = z.infer<
 >;
 
 export class IntrinsicOutputIsFinalRequestDto {
+  @ApiProperty({ type: String, description: '탑 가드 ID' })
+  topGuardRid: string;
+
+  @ApiProperty({ type: Number, description: '서버 요청 ID' })
+  serverRequestId: number;
+
   @ApiProperty({ type: Number, description: '내부 캡처 결과 ID' })
   intrinsicRequestId: number;
 
@@ -57,7 +96,8 @@ export const IntrinsicOverlayResponseSchema = z
       .number()
       .int()
       .describe('내부 캡처 결과 이미지 캡처 ID'),
-    fileName: z.string().nullable().describe('내부 캡처 결과 이미지 경로'),
+    fileName: z.string().nullable().describe('내부 캡처 결과 이미지 명'),
+    filePath: z.string().nullable().describe('내부 캡처 결과 이미지 경로'),
     createdAt: DbDateTime.describe('생성일'),
   })
   .strict()
@@ -72,7 +112,8 @@ export const IntrinsicCaptureResponseSchema = z
   .object({
     id: z.number().int().describe('내부 캡처 ID'),
     captureRequestId: z.number().int().describe('내부 캡처 요청 ID'),
-    fileName: z.string().nullable().describe('내부 캡처 이미지 경로'),
+    fileName: z.string().nullable().describe('내부 캡처 이미지 명'),
+    filePath: z.string().nullable().describe('내부 캡처 이미지 경로'),
     createdAt: DbDateTime.describe('생성일'),
   })
   .strict()
@@ -102,7 +143,7 @@ export class CaptureOverlayPairResponseDto extends createZodDto(
 ) {}
 
 export const IntrinsicOutputResponseSchema = z.object({
-  id: z.number().int(), // serial PK
+  rid: z.string(), // serial PK
   intrinsicRequestId: z.number().int(), // not null FK
   cameraMatrix: z.string().nullable(), // text (JSON string)
   distCoeffs: z.string().nullable(), // text (JSON string)

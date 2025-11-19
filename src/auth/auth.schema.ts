@@ -7,6 +7,7 @@ export const LoginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof LoginSchema>;
+export class LoginDto extends createZodDto(LoginSchema) {}
 
 export const loginLogoutSchema = z.object({
   userId: z.number().int().positive(),

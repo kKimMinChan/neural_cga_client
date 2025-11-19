@@ -13,3 +13,4 @@ export * from './schema/extrinsicCaptureRequest'; // 👈 추가
 export * from './schema/outboxes'; // 👈 추가
 export * from './schema/loginLog'; // 👈 추가
 export * from './schema/appState'; // 👈 추가
+export * from './schema/uploadRequest'; // 👈 추가

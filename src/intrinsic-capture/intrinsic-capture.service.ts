@@ -45,4 +45,14 @@ export class IntrinsicCaptureService {
       ErrorHelper.handle(error);
     }
   }
+
+  async findOneCaptureRequestByCaptureId(captureId: number) {
+    try {
+      return await this.intrinsicCaptureRepo.findOneCaptureRequestByCaptureId(
+        captureId,
+      );
+    } catch (error) {
+      ErrorHelper.handle(error);
+    }
+  }
 }

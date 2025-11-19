@@ -53,9 +53,11 @@ export class ExtrinsicCaptureRequestService {
   async requestZipStream(
     base: string,
     mode: 'short' | 'long',
+    warmup_ms?: number,
   ): Promise<AxiosResponse<any>> {
     const url = `${base}${this.buildPath(mode)}`;
-    return this.http.post(url, null);
+    console.log('warmup_ms', warmup_ms);
+    return this.http.post(url, { warmup_ms: warmup_ms ?? 500 });
   }
 
   /**
@@ -67,10 +69,16 @@ export class ExtrinsicCaptureRequestService {
     topGuardRid: string;
     extrinsicCaptureRequestId: number;
     mode: 'short' | 'long';
+    warmup_ms?: number;
   }) {
     try {
-      const { topGuardBaseUrl, mode, topGuardRid, extrinsicCaptureRequestId } =
-        params;
+      const {
+        topGuardBaseUrl,
+        mode,
+        topGuardRid,
+        extrinsicCaptureRequestId,
+        warmup_ms,
+      } = params;
 
       const folder = `top_guard_list/${topGuardRid}/extrinsic_capture_pairs`;
       const base = this.getTopGuardBase(topGuardBaseUrl);
@@ -84,7 +92,7 @@ export class ExtrinsicCaptureRequestService {
         id: extrinsicCaptureRequestId,
         status: RequestStatus.Processing,
       });
-      const resp = await this.requestZipStream(base, mode);
+      const resp = await this.requestZipStream(base, mode, warmup_ms);
 
       if (resp.status !== 200) {
         // 에러 바디를 읽어서 메시지에 포함(최대 4KB)

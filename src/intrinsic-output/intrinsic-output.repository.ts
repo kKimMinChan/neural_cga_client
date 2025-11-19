@@ -11,6 +11,9 @@ import { eq, inArray, desc, and, count } from 'drizzle-orm';
 import { intrinsicOverlays } from 'src/db/schema/intrinsicOverlay';
 import { PaginationInput } from 'src/common/Pagination.schema';
 import { RequestStatus } from 'src/common/type/request-status';
+import { outboxes } from 'src/db/schema';
+import { OutboxStatus } from 'src/sync/sync.schema';
+import { ulid } from 'ulid';
 
 @Injectable()
 export class IntrinsicOutputRepository {
@@ -37,6 +40,7 @@ export class IntrinsicOutputRepository {
       .insert(intrinsicOutputs)
       .values({
         ...data,
+        rid: ulid(),
         cameraMatrix: JSON.stringify(data.cameraMatrix),
         distCoeffs: JSON.stringify(data.distCoeffs),
         perImageReprojectionError: JSON.stringify(
@@ -125,7 +129,44 @@ export class IntrinsicOutputRepository {
     return exists.length > 0;
   }
 
-  async deleteIntrinsicOutput(id: number) {
-    return await db.delete(intrinsicOutputs).where(eq(intrinsicOutputs.id, id));
+  async findOneByIntrinsicRequestId(intrinsicRequestId: number) {
+    return await db
+      .select()
+      .from(intrinsicOutputs)
+      .where(eq(intrinsicOutputs.intrinsicRequestId, intrinsicRequestId))
+      .then((res) => res[0] ?? null);
+  }
+
+  async deleteIntrinsicOutput(rid: string) {
+    return await db
+      .delete(intrinsicOutputs)
+      .where(eq(intrinsicOutputs.rid, rid));
+  }
+
+  // ========================================================outbox========================================================
+  async createOutbox(data: {
+    opId: string;
+    entity: string;
+    rid: string;
+    patch: string;
+    preconds: string;
+    updatedAt: string;
+    status: OutboxStatus;
+    retryCount: number;
+  }) {
+    return await db
+      .insert(outboxes)
+      .values(data)
+      .returning()
+      .then((res) => res[0]);
+  }
+
+  async findOutboxByEntityAndRid(entity: string, rid: string) {
+    const [outbox] = await db
+      .select()
+      .from(outboxes)
+      .where(and(eq(outboxes.entity, entity), eq(outboxes.rid, rid)));
+
+    return outbox ?? null;
   }
 }

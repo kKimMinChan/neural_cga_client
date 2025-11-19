@@ -36,7 +36,9 @@ export class ExtrinsicCaptureRequestController {
     ),
   )
   async remoteCaptureZip(@Body() body: ExtrinsicCaptureRequestInput) {
-    const { topGuardBaseUrl, mode, topGuardRid } = body;
+    const { topGuardBaseUrl, mode, topGuardRid, warmup_ms } = body;
+
+    console.log('body', body);
 
     const extrinsicCaptureRequest =
       await this.exCapReqSvc.createExtrinsicCaptureRequest({
@@ -49,6 +51,7 @@ export class ExtrinsicCaptureRequestController {
       topGuardRid,
       extrinsicCaptureRequestId: extrinsicCaptureRequest.id,
       mode,
+      warmup_ms,
     });
 
     console.log(extrinsicCaptureRequest, 'extrinsicCaptureRequest');

@@ -134,6 +134,7 @@ export class IntrinsicRequestService {
         (result_info) => ({
           intrinsicSelectionId: result_info.id,
           fileName: path.basename(result_info.path),
+          filePath: `${topGuardRid}/result_images`,
         }),
       );
       await Promise.all(
@@ -229,6 +230,15 @@ export class IntrinsicRequestService {
       return await this.intrinsicRequestRepository.findTopGuardIdFailedRequests(
         topGuardRid,
       );
+    } catch (error) {
+      console.error(error);
+      ErrorHelper.handle(error);
+    }
+  }
+
+  async findTopGuardByRid(topGuardRid: string) {
+    try {
+      return await this.topGuardService.findTopGuardByRid(topGuardRid);
     } catch (error) {
       console.error(error);
       ErrorHelper.handle(error);

@@ -1,37 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
+import {
+  IntrinsicManifestSchema,
+  IntrinsicValueSchema,
+} from 'src/intrinsic-output/intrinsic-output.schema';
 import { z } from 'zod';
-
-export const SyncQuerySchema = z.object({
-  since: z.string().datetime().optional(),
-});
-export class SyncQueryDto extends createZodDto(SyncQuerySchema) {}
-
-const ProjectDeltaSchema = z.object({
-  rid: z.string().min(10),
-  name: z.string().min(1),
-  updatedAt: z.string().datetime(), // LWW 기준
-  deleted: z.boolean().optional(), // 추후 삭제 동기화 대비(지금은 항상 false/미지정)
-});
-
-const TopGuardDeltaSchema = z.object({
-  rid: z.string().min(10),
-  projectRid: z.string().min(10),
-  name: z.string().min(1),
-  updatedAt: z.string().datetime(),
-  deleted: z.boolean().optional(),
-});
-
-export const SyncPushSchema = z.object({
-  projects: z.array(ProjectDeltaSchema).default([]),
-  topGuards: z.array(TopGuardDeltaSchema).default([]),
-});
-export class SyncPushDto extends createZodDto(SyncPushSchema) {}
-
-export const SyncResSchema = z.object({
-  projects: z.array(ProjectDeltaSchema),
-  topGuards: z.array(TopGuardDeltaSchema),
-});
-export class SyncResDto extends createZodDto(SyncResSchema) {}
 
 export const ProjectPostSchema = z
   .object({

@@ -2,16 +2,14 @@ import {
   boolean,
   integer,
   pgTable,
-  serial,
   text,
   timestamp,
   real,
-  uuid,
 } from 'drizzle-orm/pg-core';
 import { intrinsicRequests } from './intrinsicRequest';
 
 export const intrinsicOutputs = pgTable('intrinsic_outputs', {
-  id: serial('id').primaryKey(),
+  rid: text('rid').primaryKey(),
   // uuid: uuid('uuid').defaultRandom(),
   intrinsicRequestId: integer('intrinsic_request_id')
     .references(() => intrinsicRequests.id, {
